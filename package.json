@@ -1,0 +1,42 @@
+{
+  "name": "bare-bluetooth",
+  "version": "0.0.0",
+  "description": "Bluetooth bindings for Bare",
+  "exports": {
+    "./package": "./package.json",
+    ".": "./index.js"
+  },
+  "imports": {
+    "#bluetooth": {
+      "android": "@holepunchto/bare-bluetooth-android",
+      "darwin": "@holepunchto/bare-bluetooth-apple",
+      "ios": "@holepunchto/bare-bluetooth-apple"
+    }
+  },
+  "files": [
+    "index.js",
+    "lib"
+  ],
+  "scripts": {
+    "test": "prettier . --check"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/holepunchto/bare-bluetooth.git"
+  },
+  "author": "Holepunch",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/holepunchto/bare-bluetooth/issues"
+  },
+  "homepage": "https://github.com/holepunchto/bare-bluetooth#readme",
+  "dependencies": {
+    "@holepunchto/bare-bluetooth-android": "^0.0.0",
+    "@holepunchto/bare-bluetooth-apple": "^0.0.0",
+    "bare-events": "^2.8.2"
+  },
+  "devDependencies": {
+    "prettier": "^3.4.1",
+    "prettier-config-holepunch": "^2.0.0"
+  }
+}
