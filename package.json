@@ -31,7 +31,7 @@
   },
   "homepage": "https://github.com/holepunchto/bare-bluetooth#readme",
   "dependencies": {
-    "@holepunchto/bare-bluetooth-android": "^0.0.0",
+    "@holepunchto/bare-bluetooth-android": "holepunchto/bare-bluetooth-android",
     "@holepunchto/bare-bluetooth-apple": "^0.0.0",
     "bare-events": "^2.8.2"
   },
