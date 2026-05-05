@@ -8,17 +8,17 @@
   },
   "imports": {
     "#bluetooth": {
-      "android": "@holepunchto/bare-bluetooth-android",
-      "darwin": "@holepunchto/bare-bluetooth-apple",
-      "ios": "@holepunchto/bare-bluetooth-apple"
+      "android": "bare-bluetooth-android",
+      "darwin": "bare-bluetooth-apple",
+      "ios": "bare-bluetooth-apple"
     }
   },
   "files": [
-    "index.js",
-    "lib"
+    "index.js"
   ],
   "scripts": {
-    "test": "prettier . --check"
+    "format": "prettier --write . && lunte --fix",
+    "lint": "prettier --check . && lunte"
   },
   "repository": {
     "type": "git",
@@ -31,11 +31,11 @@
   },
   "homepage": "https://github.com/holepunchto/bare-bluetooth#readme",
   "dependencies": {
-    "@holepunchto/bare-bluetooth-android": "holepunchto/bare-bluetooth-android#cmake-java",
-    "@holepunchto/bare-bluetooth-apple": "^0.0.0",
-    "bare-events": "^2.8.2"
+    "bare-bluetooth-android": "^0.1.1",
+    "bare-bluetooth-apple": "^0.1.2"
   },
   "devDependencies": {
+    "lunte": "^1.7.0",
     "prettier": "^3.4.1",
     "prettier-config-holepunch": "^2.0.0"
   }
