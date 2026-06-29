@@ -402,6 +402,20 @@ Emitted with `channel` and `error` when an L2CAP channel is opened by a central.
 
 Android only. Emitted with `deviceAddress` and `status` when a notification is delivered.
 
+### `Server.STATE_UNKNOWN`
+
+### `Server.STATE_POWERED_ON`
+
+### `Server.STATE_POWERED_OFF`
+
+### `Server.STATE_RESETTING`
+
+### `Server.STATE_UNAUTHORIZED`
+
+### `Server.STATE_UNSUPPORTED`
+
+Apple-only Bluetooth state constants.
+
 ### `Server.PROPERTY_READ`
 
 ### `Server.PROPERTY_WRITE_WITHOUT_RESPONSE`
