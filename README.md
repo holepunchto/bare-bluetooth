@@ -366,13 +366,13 @@ Emitted with `uuid` and `error` when a service has been added.
 
 Emitted with `request` when a central reads a characteristic.
 
-The `request` object has `characteristicUuid` and `offset` properties on both platforms. On Android it also has `handle` and `requestId` properties. On Apple it has a `_handle` property.
+The `request` object has `characteristicUuid` and `offset` properties on both platforms. On Android it also has `requestId` and `responseNeeded` properties. Pass the `request` object directly to `server.respondToRequest()`.
 
 ### `event: 'writeRequest'`
 
 Emitted with `requests` when a central writes to a characteristic.
 
-Each request has `characteristicUuid`, `data`, and `offset` properties. On Android each request additionally has `handle`, `requestId`, and `responseNeeded` properties. On Apple each request has a `_handle` property.
+Each request has `characteristicUuid`, `data`, and `offset` properties. On Android each request additionally has `requestId` and `responseNeeded` properties.
 
 ### `event: 'subscribe'`
 
