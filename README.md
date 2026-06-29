@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> This module is experimental. The API is subject to change and may break at any time.
+
 # bare-bluetooth
 
 Bluetooth bindings for Bare. Provides BLE central and peripheral roles, GATT services and characteristics, and L2CAP channels across Apple and Android platforms.
