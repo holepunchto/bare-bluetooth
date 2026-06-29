@@ -1,6 +1,8 @@
 # bare-bluetooth
 
-Bluetooth bindings for Bare. Provides BLE central and peripheral roles, GATT services and characteristics, and L2CAP channels across Apple and Android platforms by re-exporting the platform-appropriate module.
+Bluetooth bindings for Bare. Provides BLE central and peripheral roles, GATT services and characteristics, and L2CAP channels across Apple and Android platforms.
+
+The module normalizes API differences between platforms so consumer code does not need platform conditionals. State strings, class names, and constants are unified.
 
 ```
 npm i bare-bluetooth
@@ -9,8 +11,6 @@ npm i bare-bluetooth
 ## Usage
 
 The example below shows a peripheral advertising a single writable, notifying characteristic and a central that scans, connects, subscribes, and exchanges data with it.
-
-The Bluetooth-ready state name differs by platform: Apple emits `'poweredOn'` and Android emits `'on'`. The snippets below accept either so the same code runs on both.
 
 Peripheral:
 
@@ -25,9 +25,7 @@ const server = new Server()
 let pingChar = null
 
 server.on('stateChange', (state) => {
-  if (state !== 'poweredOn' && state !== 'on') {
-    return
-  }
+  if (state !== 'poweredOn') return
 
   pingChar = new Characteristic(CHAR_UUID, {
     write: true,
@@ -67,9 +65,7 @@ const CHAR_UUID = '01230001-0000-1000-8000-00805F9B34FB'
 const central = new Central()
 
 central.on('stateChange', (state) => {
-  if (state !== 'poweredOn' && state !== 'on') {
-    return
-  }
+  if (state !== 'poweredOn') return
 
   central.startScan([SERVICE_UUID])
 })
@@ -119,10 +115,9 @@ The package resolves to a platform-specific implementation:
 - `android` resolves to [`bare-bluetooth-android`](https://github.com/holepunchto/bare-bluetooth-android)
 - `darwin` and `ios` resolve to [`bare-bluetooth-apple`](https://github.com/holepunchto/bare-bluetooth-apple)
 
-Some state names, events, options, and constants differ between platforms. The platform-specific READMEs are the source of truth. Where the API diverges each README notes the divergence:
+State strings are normalized across platforms. Both platforms emit `'poweredOn'` and `'poweredOff'`. Android additionally emits `'turningOn'` and `'turningOff'` transitional states. Apple additionally emits `'unknown'`, `'resetting'`, `'unsupported'`, and `'unauthorized'` states.
 
-- [bare-bluetooth-apple README](https://github.com/holepunchto/bare-bluetooth-apple)
-- [bare-bluetooth-android README](https://github.com/holepunchto/bare-bluetooth-android)
+Some events and options remain platform-specific and are documented below.
 
 ## API
 
@@ -134,12 +129,7 @@ Create a new BLE central manager. The central scans for and connects to peripher
 
 ### `central.state`
 
-The current Bluetooth state.
-
-State values differ between platforms:
-
-- Apple: `'unknown'`, `'resetting'`, `'unsupported'`, `'unauthorized'`, `'poweredOff'`, or `'poweredOn'`.
-- Android: `'off'`, `'turningOn'`, `'on'`, or `'turningOff'`.
+The current Bluetooth state as a string. Common values across platforms are `'poweredOn'` and `'poweredOff'`.
 
 ### `central.startScan([serviceUUIDs][, options])`
 
@@ -173,11 +163,11 @@ Destroy the central manager and release all resources.
 
 ### `event: 'stateChange'`
 
-Emitted with `state` when the Bluetooth state changes. See `central.state` for platform-specific values.
+Emitted with `state` when the Bluetooth state changes.
 
 ### `event: 'discover'`
 
-Emitted with `peripheral` when a peripheral is discovered during scanning. The `peripheral` object has `handle`, `id`, `name`, and `rssi` properties.
+Emitted with `peripheral` when a peripheral is discovered during scanning. The `peripheral` object has `id`, `name`, and `rssi` properties.
 
 ### `event: 'connect'`
 
@@ -191,9 +181,9 @@ Emitted with `peripheral` and `error` when a peripheral disconnects.
 
 Emitted with `id` and `error` when a connection attempt fails.
 
-### `event: 'scanFail'`
+### `event: 'error'`
 
-Android only. Emitted with `errorCode` when scanning fails. See the [bare-bluetooth-android README](https://github.com/holepunchto/bare-bluetooth-android).
+Android only. Emitted with a `BluetoothError` when scanning fails.
 
 ### `Central.SCAN_MODE_OPPORTUNISTIC`
 
@@ -207,20 +197,6 @@ Android-only scan mode constants for use with `central.startScan()`.
 
 ## Peripheral
 
-### `const peripheral = new Peripheral(peripheralHandle[, options])`
-
-Represents a connected BLE peripheral. Typically obtained through the `'connect'` event on `Central` rather than constructed directly.
-
-Options include:
-
-```js
-options = {
-  id: null,
-  name: null,
-  connectHandle: null
-}
-```
-
 ### `peripheral.id`
 
 The unique identifier of the peripheral.
@@ -228,6 +204,10 @@ The unique identifier of the peripheral.
 ### `peripheral.name`
 
 The advertised name of the peripheral, or `null` if unavailable.
+
+### `peripheral.serviceData`
+
+Service data from the scan advertisement, or `null`.
 
 ### `peripheral.discoverServices([serviceUUIDs])`
 
@@ -259,7 +239,7 @@ Open an L2CAP channel to the peripheral using the given `psm`. The result is emi
 
 ### `peripheral.requestMtu(mtu)`
 
-Android only. Request a new MTU size. The result is emitted via the `'mtuChanged'` event. See the [bare-bluetooth-android README](https://github.com/holepunchto/bare-bluetooth-android).
+Android only. Request a new MTU size. The result is emitted via the `'mtuChanged'` event.
 
 ### `peripheral.destroy()`
 
@@ -307,7 +287,7 @@ Android only. Emitted with `mtu` and `error` when the MTU is changed.
 
 ### `Peripheral.PROPERTY_INDICATE`
 
-Android-only characteristic property constants. On Apple the equivalent flags are exposed on `Server` and `Characteristic`.
+Characteristic property constants.
 
 ## Server
 
@@ -315,9 +295,11 @@ Android-only characteristic property constants. On Apple the equivalent flags ar
 
 Create a new BLE peripheral manager (server). The server advertises services and handles read/write requests from centrals.
 
+On Apple this wraps `PeripheralManager` from `bare-bluetooth-apple`. On Android this wraps `Server` from `bare-bluetooth-android`.
+
 ### `server.state`
 
-The current Bluetooth state. See `central.state` for platform-specific values.
+The current Bluetooth state. See `central.state`.
 
 ### `server.addService(service)`
 
@@ -332,7 +314,8 @@ Options include:
 ```js
 options = {
   name: null,
-  serviceUUIDs: null
+  serviceUUIDs: null,
+  serviceData: null // Apple only
 }
 ```
 
@@ -380,22 +363,17 @@ Emitted with `uuid` and `error` when a service has been added.
 
 Emitted with `request` when a central reads a characteristic.
 
-The `request` object has `handle`, `characteristicUuid`, and `offset` properties on both platforms. On Android it also has a `requestId` property.
+The `request` object has `characteristicUuid` and `offset` properties on both platforms. On Android it also has `handle` and `requestId` properties. On Apple it has a `_handle` property.
 
 ### `event: 'writeRequest'`
 
 Emitted with `requests` when a central writes to a characteristic.
 
-Each request has `handle`, `characteristicUuid`, `data`, and `offset` properties. On Android each request additionally has `requestId` and `responseNeeded` properties.
+Each request has `characteristicUuid`, `data`, and `offset` properties. On Android each request additionally has `handle`, `requestId`, and `responseNeeded` properties. On Apple each request has a `_handle` property.
 
 ### `event: 'subscribe'`
 
-Emitted when a central subscribes to notifications.
-
-The listener receives `characteristicUuid` and a peer identifier whose name differs by platform:
-
-- Apple: `centralHandle`, `characteristicUuid`.
-- Android: `deviceAddress`, `characteristicUuid`.
+Emitted when a central subscribes to notifications. The listener receives a peer identifier and `characteristicUuid`.
 
 ### `event: 'unsubscribe'`
 
@@ -405,9 +383,9 @@ Emitted when a central unsubscribes from notifications. Arguments mirror `'subsc
 
 Apple only. Emitted when the server is ready to send another update after a previous `updateValue()` returned `false`.
 
-### `event: 'advertiseError'`
+### `event: 'error'`
 
-Android only. Emitted with `errorCode` and `error` when advertising fails.
+Emitted with a `BluetoothError` when advertising fails.
 
 ### `event: 'channelPublish'`
 
@@ -420,20 +398,6 @@ Emitted with `channel` and `error` when an L2CAP channel is opened by a central.
 ### `event: 'notifySent'`
 
 Android only. Emitted with `deviceAddress` and `status` when a notification is delivered.
-
-### `Server.STATE_UNKNOWN`
-
-### `Server.STATE_POWERED_ON`
-
-### `Server.STATE_POWERED_OFF`
-
-### `Server.STATE_RESETTING`
-
-### `Server.STATE_UNAUTHORIZED`
-
-### `Server.STATE_UNSUPPORTED`
-
-Apple-only Bluetooth state constants.
 
 ### `Server.PROPERTY_READ`
 
@@ -559,7 +523,7 @@ The static value of the characteristic, or `null`.
 
 ### `Characteristic.PROPERTY_INDICATE`
 
-Android-only characteristic property constants exposed on `Characteristic`. On Apple the equivalent flags live on `Server`.
+Characteristic property constants.
 
 ## License
 
