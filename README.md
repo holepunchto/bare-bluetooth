@@ -118,9 +118,7 @@ The package resolves to a platform-specific implementation:
 - `android` resolves to [`bare-bluetooth-android`](https://github.com/holepunchto/bare-bluetooth-android)
 - `darwin` and `ios` resolve to [`bare-bluetooth-apple`](https://github.com/holepunchto/bare-bluetooth-apple)
 
-State strings are normalized across platforms. Both platforms emit `'poweredOn'` and `'poweredOff'`. Android additionally emits `'turningOn'` and `'turningOff'` transitional states. Apple additionally emits `'unknown'`, `'resetting'`, `'unsupported'`, and `'unauthorized'` states.
-
-Some events and options remain platform-specific and are documented below.
+State strings are normalized across platforms. Both platforms emit `'poweredOn'` and `'poweredOff'`. Some events and options remain platform-specific, you can refer to modules above.
 
 ## API
 
