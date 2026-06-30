@@ -454,9 +454,7 @@ ATT result codes for use with `server.respondToRequest()`.
 
 ## L2CAPChannel
 
-### `const channel = new L2CAPChannel(channelHandle)`
-
-An L2CAP connection-oriented channel. Typically obtained through the `'channelOpen'` event on `Server` or `Peripheral` rather than constructed directly. Extends `Duplex` from [`bare-stream`](https://github.com/holepunchto/bare-stream) and supports standard readable and writable stream operations.
+An L2CAP connection-oriented channel. Obtained through the `'channelOpen'` event on `Server` or `Peripheral`. Extends `Duplex` from [`bare-stream`](https://github.com/holepunchto/bare-stream) and supports standard readable and writable stream operations.
 
 ### `channel.psm`
 
