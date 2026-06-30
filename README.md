@@ -186,6 +186,17 @@ Emitted with `id` and `error` when a connection attempt fails.
 
 Android only. Emitted with a `BluetoothError` when scanning fails.
 
+#### Platform support
+
+| Event         | Android | Apple |
+| ------------- | ------- | ----- |
+| `stateChange` | ✓       | ✓     |
+| `discover`    | ✓       | ✓     |
+| `connect`     | ✓       | ✓     |
+| `disconnect`  | ✓       | ✓     |
+| `connectFail` | ✓       | ✓     |
+| `error`       | ✓       | —     |
+
 ### `Central.SCAN_MODE_OPPORTUNISTIC`
 
 ### `Central.SCAN_MODE_LOW_POWER`
@@ -277,6 +288,24 @@ Emitted with `channel` and `error` when an L2CAP channel is opened. The `channel
 ### `event: 'mtuChanged'`
 
 Android only. Emitted with `mtu` and `error` when the MTU is changed.
+
+### `event: 'disconnect'`
+
+Android only. Emitted with `error` when the peripheral disconnects.
+
+#### Platform support
+
+| Event                     | Android | Apple |
+| ------------------------- | ------- | ----- |
+| `servicesDiscover`        | ✓       | ✓     |
+| `characteristicsDiscover` | ✓       | ✓     |
+| `read`                    | ✓       | ✓     |
+| `write`                   | ✓       | ✓     |
+| `notify`                  | ✓       | ✓     |
+| `notifyState`             | ✓       | ✓     |
+| `channelOpen`             | ✓       | ✓     |
+| `disconnect`              | ✓       | —     |
+| `mtuChanged`              | ✓       | —     |
 
 ### `Peripheral.PROPERTY_READ`
 
@@ -399,6 +428,22 @@ Emitted with `channel` and `error` when an L2CAP channel is opened by a central.
 ### `event: 'notifySent'`
 
 Android only. Emitted with `deviceAddress` and `status` when a notification is delivered.
+
+#### Platform support
+
+| Event            | Android | Apple |
+| ---------------- | ------- | ----- |
+| `stateChange`    | ✓       | ✓     |
+| `serviceAdd`     | ✓       | ✓     |
+| `readRequest`    | ✓       | ✓     |
+| `writeRequest`   | ✓       | ✓     |
+| `subscribe`      | ✓       | ✓     |
+| `unsubscribe`    | ✓       | ✓     |
+| `error`          | ✓       | ✓     |
+| `channelPublish` | ✓       | ✓     |
+| `channelOpen`    | ✓       | ✓     |
+| `notifySent`     | ✓       | —     |
+| `readyToUpdate`  | —       | ✓     |
 
 ### `Server.STATE_UNKNOWN`
 
