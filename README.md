@@ -168,7 +168,7 @@ Emitted with `state` when the Bluetooth state changes.
 
 ### `event: 'discover'`
 
-Emitted with `peripheral` when a peripheral is discovered during scanning. The `peripheral` object has `id`, `name`, and `rssi` properties.
+Emitted with `peripheral` when a peripheral is discovered during scanning. The `peripheral` is a `DiscoveredPeripheral` instance with `id`, `name`, `rssi`, and `serviceData` properties. Pass it directly to `central.connect()`.
 
 ### `event: 'connect'`
 
@@ -325,8 +325,6 @@ Characteristic property constants.
 
 Create a new BLE peripheral manager (server). The server advertises services and handles read/write requests from centrals.
 
-On Apple this wraps `PeripheralManager` from `bare-bluetooth-apple`. On Android this wraps `Server` from `bare-bluetooth-android`.
-
 ### `server.state`
 
 The current Bluetooth state. See `central.state`.
@@ -391,15 +389,11 @@ Emitted with `uuid` and `error` when a service has been added.
 
 ### `event: 'readRequest'`
 
-Emitted with `request` when a central reads a characteristic.
-
-The `request` object has `characteristicUuid` and `offset` properties on both platforms. On Android it also has `requestId` and `responseNeeded` properties. Pass the `request` object directly to `server.respondToRequest()`.
+Emitted with `request` when a central reads a characteristic. The `request` is a `ReadRequest` instance with `characteristicUuid` and `offset` properties. Pass it directly to `server.respondToRequest()`.
 
 ### `event: 'writeRequest'`
 
-Emitted with `requests` when a central writes to a characteristic.
-
-Each request has `characteristicUuid`, `data`, and `offset` properties. On Android each request additionally has `requestId` and `responseNeeded` properties.
+Emitted with `requests` when a central writes to a characteristic. Each request is a `WriteRequest` instance with `characteristicUuid`, `data`, `offset`, and `responseNeeded` properties.
 
 ### `event: 'subscribe'`
 
