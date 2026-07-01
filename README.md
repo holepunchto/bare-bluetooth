@@ -1,6 +1,11 @@
+> [!IMPORTANT]
+> This module is experimental. The API is subject to change and may break at any time.
+
 # bare-bluetooth
 
-Bluetooth bindings for Bare. Provides BLE central and peripheral roles, GATT services and characteristics, and L2CAP channels across Apple and Android platforms by re-exporting the platform-appropriate module.
+Bluetooth bindings for Bare. Provides BLE central and peripheral roles, GATT services and characteristics, and L2CAP channels across Apple and Android platforms.
+
+The module normalizes API differences between platforms so consumer code does not need platform conditionals. State strings, class names, and constants are unified.
 
 ```
 npm i bare-bluetooth
@@ -9,8 +14,6 @@ npm i bare-bluetooth
 ## Usage
 
 The example below shows a peripheral advertising a single writable, notifying characteristic and a central that scans, connects, subscribes, and exchanges data with it.
-
-The Bluetooth-ready state name differs by platform: Apple emits `'poweredOn'` and Android emits `'on'`. The snippets below accept either so the same code runs on both.
 
 Peripheral:
 
@@ -25,9 +28,7 @@ const server = new Server()
 let pingChar = null
 
 server.on('stateChange', (state) => {
-  if (state !== 'poweredOn' && state !== 'on') {
-    return
-  }
+  if (state !== 'poweredOn') return
 
   pingChar = new Characteristic(CHAR_UUID, {
     write: true,
@@ -67,9 +68,7 @@ const CHAR_UUID = '01230001-0000-1000-8000-00805F9B34FB'
 const central = new Central()
 
 central.on('stateChange', (state) => {
-  if (state !== 'poweredOn' && state !== 'on') {
-    return
-  }
+  if (state !== 'poweredOn') return
 
   central.startScan([SERVICE_UUID])
 })
@@ -119,240 +118,225 @@ The package resolves to a platform-specific implementation:
 - `android` resolves to [`bare-bluetooth-android`](https://github.com/holepunchto/bare-bluetooth-android)
 - `darwin` and `ios` resolve to [`bare-bluetooth-apple`](https://github.com/holepunchto/bare-bluetooth-apple)
 
-Some state names, events, options, and constants differ between platforms. The platform-specific READMEs are the source of truth. Where the API diverges each README notes the divergence:
+## Types
 
-- [bare-bluetooth-apple README](https://github.com/holepunchto/bare-bluetooth-apple)
-- [bare-bluetooth-android README](https://github.com/holepunchto/bare-bluetooth-android)
+### `BluetoothState`
+
+A string describing the current Bluetooth adapter state.
+
+| Value            | Platforms      |
+| ---------------- | -------------- |
+| `'unknown'`      | Apple          |
+| `'resetting'`    | Apple          |
+| `'unsupported'`  | Apple          |
+| `'unauthorized'` | Apple          |
+| `'poweredOff'`   | Android, Apple |
+| `'poweredOn'`    | Android, Apple |
+| `'turningOn'`    | Android        |
+| `'turningOff'`   | Android        |
 
 ## API
 
-## Central
+## `Central`
 
 ### `const central = new Central()`
 
 Create a new BLE central manager. The central scans for and connects to peripherals.
 
-### `central.state`
+### Properties
 
-The current Bluetooth state.
+| Property | Type             | Description                     |
+| -------- | ---------------- | ------------------------------- |
+| `state`  | `BluetoothState` | Current Bluetooth adapter state |
 
-State values differ between platforms:
+### Methods
 
-- Apple: `'unknown'`, `'resetting'`, `'unsupported'`, `'unauthorized'`, `'poweredOff'`, or `'poweredOn'`.
-- Android: `'off'`, `'turningOn'`, `'on'`, or `'turningOff'`.
-
-### `central.startScan([serviceUUIDs][, options])`
+#### `central.startScan([serviceUUIDs[, options]])`
 
 Start scanning for peripherals. If `serviceUUIDs` is provided, only peripherals advertising those services will be discovered.
 
-Android accepts an additional `options` argument:
-
 ```js
 options = {
-  scanMode: null
+  scanMode: null // Android only
 }
 ```
 
-Set `scanMode` to one of `Central.SCAN_MODE_OPPORTUNISTIC`, `Central.SCAN_MODE_LOW_POWER`, `Central.SCAN_MODE_BALANCED`, or `Central.SCAN_MODE_LOW_LATENCY`. These constants are Android-only.
+Set `scanMode` to one of `Central.SCAN_MODE_OPPORTUNISTIC`, `Central.SCAN_MODE_LOW_POWER`, `Central.SCAN_MODE_BALANCED`, or `Central.SCAN_MODE_LOW_LATENCY`.
 
-### `central.stopScan()`
+#### `central.stopScan()`
 
 Stop scanning for peripherals.
 
-### `central.connect(peripheral)`
+#### `central.connect(peripheral)`
 
-Connect to a discovered `peripheral`.
+Connect to a `DiscoveredPeripheral`.
 
-### `central.disconnect(peripheral)`
+#### `central.disconnect(peripheral)`
 
-Disconnect from a connected `peripheral`.
+Disconnect from a connected `Peripheral`.
 
-### `central.destroy()`
+#### `central.destroy()`
 
 Destroy the central manager and release all resources.
 
-### `event: 'stateChange'`
+### Events
 
-Emitted with `state` when the Bluetooth state changes. See `central.state` for platform-specific values.
+| Event         | Arguments                                                 | Description                            |
+| ------------- | --------------------------------------------------------- | -------------------------------------- |
+| `stateChange` | `state: BluetoothState`                                   | Bluetooth adapter state changed        |
+| `discover`    | `peripheral: DiscoveredPeripheral`                        | A peripheral was found during scanning |
+| `connect`     | `peripheral: Peripheral`                                  | Connection to a peripheral established |
+| `disconnect`  | `peripheral: Peripheral \| null`, `error: string \| null` | A peripheral disconnected              |
+| `connectFail` | `id: string`, `error: string`                             | A connection attempt failed            |
 
-### `event: 'discover'`
+| Event   | Arguments      | Platform |
+| ------- | -------------- | -------- |
+| `error` | `error: Error` | Android  |
 
-Emitted with `peripheral` when a peripheral is discovered during scanning. The `peripheral` object has `handle`, `id`, `name`, and `rssi` properties.
+### Constants
 
-### `event: 'connect'`
+| Constant                          | Description                                                          |
+| --------------------------------- | -------------------------------------------------------------------- |
+| `Central.SCAN_MODE_OPPORTUNISTIC` | Scan using highest duty cycle when other apps are scanning (Android) |
+| `Central.SCAN_MODE_LOW_POWER`     | Low power scan mode                                                  |
+| `Central.SCAN_MODE_BALANCED`      | Balanced scan mode                                                   |
+| `Central.SCAN_MODE_LOW_LATENCY`   | Low latency scan mode                                                |
 
-Emitted with `peripheral` when a connection to a peripheral is established. The `peripheral` is a `Peripheral` instance.
+## `DiscoveredPeripheral`
 
-### `event: 'disconnect'`
+Represents a peripheral found during scanning. Emitted by the `discover` event on `Central`. Pass it directly to `central.connect()`.
 
-Emitted with `peripheral` and `error` when a peripheral disconnects.
+### Properties
 
-### `event: 'connectFail'`
+| Property      | Type                                     | Description                                |
+| ------------- | ---------------------------------------- | ------------------------------------------ |
+| `id`          | `string`                                 | Unique identifier of the peripheral        |
+| `name`        | `string \| null`                         | Advertised name, or `null`                 |
+| `rssi`        | `number`                                 | Signal strength in dBm                     |
+| `serviceData` | `{ [uuid: string]: Uint8Array } \| null` | Service data from advertisement, or `null` |
 
-Emitted with `id` and `error` when a connection attempt fails.
+## `Peripheral`
 
-### `event: 'scanFail'`
+Represents a connected peripheral. Obtained from the `connect` event on `Central`.
 
-Android only. Emitted with `errorCode` when scanning fails. See the [bare-bluetooth-android README](https://github.com/holepunchto/bare-bluetooth-android).
+### Properties
 
-### `Central.SCAN_MODE_OPPORTUNISTIC`
+| Property      | Type                                     | Description                         |
+| ------------- | ---------------------------------------- | ----------------------------------- |
+| `id`          | `string`                                 | Unique identifier of the peripheral |
+| `name`        | `string \| null`                         | Advertised name, or `null`          |
+| `serviceData` | `{ [uuid: string]: Uint8Array } \| null` | Service data, or `null`             |
 
-### `Central.SCAN_MODE_LOW_POWER`
+### Methods
 
-### `Central.SCAN_MODE_BALANCED`
+#### `peripheral.discoverServices([serviceUUIDs])`
 
-### `Central.SCAN_MODE_LOW_LATENCY`
+Discover services on the peripheral. On Apple, an optional `serviceUUIDs` array restricts discovery to those services. Android always discovers all services. Results are emitted via `servicesDiscover`.
 
-Android-only scan mode constants for use with `central.startScan()`.
+#### `peripheral.discoverCharacteristics(service[, characteristicUUIDs])`
 
-## Peripheral
+Discover characteristics for a `Service`. On Apple, an optional `characteristicUUIDs` array restricts discovery. Android always discovers all characteristics. Results are emitted via `characteristicsDiscover`.
 
-### `const peripheral = new Peripheral(peripheralHandle[, options])`
+#### `peripheral.read(characteristic)`
 
-Represents a connected BLE peripheral. Typically obtained through the `'connect'` event on `Central` rather than constructed directly.
+Read the value of a `Characteristic`. The result is emitted via `read`.
 
-Options include:
+#### `peripheral.write(characteristic, data[, withResponse])`
 
-```js
-options = {
-  id: null,
-  name: null,
-  connectHandle: null
-}
-```
+Write `data: Uint8Array` to a `Characteristic`. If `withResponse` is `true` (the default), the write is confirmed by the peripheral.
 
-### `peripheral.id`
+#### `peripheral.subscribe(characteristic)`
 
-The unique identifier of the peripheral.
+Subscribe to notifications for a `Characteristic`.
 
-### `peripheral.name`
+#### `peripheral.unsubscribe(characteristic)`
 
-The advertised name of the peripheral, or `null` if unavailable.
+Unsubscribe from notifications for a `Characteristic`.
 
-### `peripheral.discoverServices([serviceUUIDs])`
+#### `peripheral.openL2CAPChannel(psm)`
 
-Discover services on the peripheral. On Apple, an optional `serviceUUIDs` filter restricts discovery to those services. Android always discovers all services. Results are emitted via the `'servicesDiscover'` event.
+Open an L2CAP channel to the peripheral using the given `psm: number`. The result is emitted via `channelOpen`.
 
-### `peripheral.discoverCharacteristics(service[, characteristicUUIDs])`
+#### `peripheral.requestMtu(mtu)`
 
-Discover characteristics for a `service`. On Apple, an optional `characteristicUUIDs` filter restricts discovery. Android always discovers all characteristics. Results are emitted via the `'characteristicsDiscover'` event.
+Request a new MTU size (`mtu: number`). The result is emitted via `mtuChanged`. No-op on Apple.
 
-### `peripheral.read(characteristic)`
-
-Read the value of a `characteristic`. The result is emitted via the `'read'` event.
-
-### `peripheral.write(characteristic, data[, withResponse])`
-
-Write `data` to a `characteristic`. If `withResponse` is `true` (the default), the write will be confirmed by the peripheral.
-
-### `peripheral.subscribe(characteristic)`
-
-Subscribe to notifications for a `characteristic`.
-
-### `peripheral.unsubscribe(characteristic)`
-
-Unsubscribe from notifications for a `characteristic`.
-
-### `peripheral.openL2CAPChannel(psm)`
-
-Open an L2CAP channel to the peripheral using the given `psm`. The result is emitted via the `'channelOpen'` event.
-
-### `peripheral.requestMtu(mtu)`
-
-Android only. Request a new MTU size. The result is emitted via the `'mtuChanged'` event. See the [bare-bluetooth-android README](https://github.com/holepunchto/bare-bluetooth-android).
-
-### `peripheral.destroy()`
+#### `peripheral.destroy()`
 
 Destroy the peripheral instance and release resources.
 
-### `event: 'servicesDiscover'`
+### Events
 
-Emitted with `services` and `error` when services are discovered.
+| Event                     | Arguments                                                                                        | Description                              |
+| ------------------------- | ------------------------------------------------------------------------------------------------ | ---------------------------------------- |
+| `servicesDiscover`        | `services: Service[] \| null`, `error: string \| null`                                           | Services discovered                      |
+| `characteristicsDiscover` | `service: Service \| null`, `characteristics: Characteristic[] \| null`, `error: string \| null` | Characteristics discovered for a service |
+| `read`                    | `characteristic: Characteristic \| null`, `data: Uint8Array \| null`, `error: string \| null`    | Characteristic value read                |
+| `write`                   | `characteristic: Characteristic \| null`, `error: string \| null`                                | Characteristic write completed           |
+| `notify`                  | `characteristic: Characteristic \| null`, `data: Uint8Array \| null`, `error: string \| null`    | Notification received                    |
+| `notifyState`             | `characteristic: Characteristic \| null`, `isNotifying: boolean`, `error: string \| null`        | Notification state changed               |
+| `channelOpen`             | `channel: L2CAPChannel \| null`, `error: string \| null`                                         | L2CAP channel opened                     |
 
-### `event: 'characteristicsDiscover'`
+| Event        | Arguments                              | Platform |
+| ------------ | -------------------------------------- | -------- |
+| `disconnect` | `error: string \| null`                | Android  |
+| `mtuChanged` | `mtu: number`, `error: string \| null` | Android  |
 
-Emitted with `service`, `characteristics`, and `error` when characteristics are discovered.
+### Constants
 
-### `event: 'read'`
+| Constant                                     | Value  |
+| -------------------------------------------- | ------ |
+| `Peripheral.PROPERTY_READ`                   | `0x02` |
+| `Peripheral.PROPERTY_WRITE_WITHOUT_RESPONSE` | `0x04` |
+| `Peripheral.PROPERTY_WRITE`                  | `0x08` |
+| `Peripheral.PROPERTY_NOTIFY`                 | `0x10` |
+| `Peripheral.PROPERTY_INDICATE`               | `0x20` |
 
-Emitted with `characteristic`, `data`, and `error` when a characteristic value is read.
-
-### `event: 'write'`
-
-Emitted with `characteristic` and `error` when a characteristic write completes.
-
-### `event: 'notify'`
-
-Emitted with `characteristic`, `data`, and `error` when a notification is received.
-
-### `event: 'notifyState'`
-
-Emitted with `characteristic`, `isNotifying`, and `error` when the notification state changes.
-
-### `event: 'channelOpen'`
-
-Emitted with `channel` and `error` when an L2CAP channel is opened. The `channel` is an `L2CAPChannel` instance.
-
-### `event: 'mtuChanged'`
-
-Android only. Emitted with `mtu` and `error` when the MTU is changed.
-
-### `Peripheral.PROPERTY_READ`
-
-### `Peripheral.PROPERTY_WRITE_WITHOUT_RESPONSE`
-
-### `Peripheral.PROPERTY_WRITE`
-
-### `Peripheral.PROPERTY_NOTIFY`
-
-### `Peripheral.PROPERTY_INDICATE`
-
-Android-only characteristic property constants. On Apple the equivalent flags are exposed on `Server` and `Characteristic`.
-
-## Server
+## `Server`
 
 ### `const server = new Server()`
 
 Create a new BLE peripheral manager (server). The server advertises services and handles read/write requests from centrals.
 
-### `server.state`
+### Properties
 
-The current Bluetooth state. See `central.state` for platform-specific values.
+| Property | Type             | Description                     |
+| -------- | ---------------- | ------------------------------- |
+| `state`  | `BluetoothState` | Current Bluetooth adapter state |
 
-### `server.addService(service)`
+### Methods
 
-Add a `service` to the GATT server. The `'serviceAdd'` event is emitted when the service has been registered.
+#### `server.addService(service)`
 
-### `server.startAdvertising([options])`
+Add a `Service` to the GATT server. The `serviceAdd` event is emitted when the service has been registered.
+
+#### `server.startAdvertising([options])`
 
 Start advertising the server.
-
-Options include:
 
 ```js
 options = {
   name: null,
-  serviceUUIDs: null
+  serviceUUIDs: null,
+  serviceData: null // Apple only
 }
 ```
 
-### `server.stopAdvertising()`
+#### `server.stopAdvertising()`
 
 Stop advertising.
 
-### `server.respondToRequest(request, result[, data])`
+#### `server.respondToRequest(request, result[, data])`
 
-Respond to a read or write `request` with the given ATT `result` code. Optionally include `data` for read responses. Use the `Server.ATT_*` constants for `result`.
+Respond to a `ReadRequest` or `WriteRequest` with the given ATT `result: number` code. Optionally include `data: Uint8Array` for read responses. Use the `Server.ATT_*` constants for `result`.
 
-### `server.updateValue(characteristic, data)`
+#### `server.updateValue(characteristic, data)`
 
-Update the value of a `characteristic` and notify subscribed centrals. Returns `true` if the update was sent successfully.
+Update the value of a `Characteristic` and notify subscribed centrals. `data` is a `Uint8Array`. Returns `true` if the update was sent successfully.
 
-### `server.publishChannel([options])`
+#### `server.publishChannel([options])`
 
-Publish an L2CAP channel. The `'channelPublish'` event is emitted with the assigned PSM.
-
-Options include:
+Publish an L2CAP channel. The `channelPublish` event is emitted with the assigned PSM.
 
 ```js
 options = {
@@ -360,206 +344,166 @@ options = {
 }
 ```
 
-### `server.unpublishChannel(psm)`
+#### `server.unpublishChannel(psm)`
 
-Unpublish a previously published L2CAP channel identified by `psm`.
+Unpublish a previously published L2CAP channel identified by `psm: number`.
 
-### `server.destroy()`
+#### `server.destroy()`
 
 Destroy the server and release all resources.
 
-### `event: 'stateChange'`
+### Events
 
-Emitted with `state` when the Bluetooth state changes.
+| Event            | Arguments                                                     | Description                             |
+| ---------------- | ------------------------------------------------------------- | --------------------------------------- |
+| `stateChange`    | `state: BluetoothState`                                       | Bluetooth adapter state changed         |
+| `serviceAdd`     | `uuid: string`, `error: string \| undefined`                  | Service registered                      |
+| `readRequest`    | `request: ReadRequest`                                        | Central read a characteristic           |
+| `writeRequest`   | `requests: WriteRequest[]`                                    | Central wrote to a characteristic       |
+| `subscribe`      | `peer: unknown`, `characteristicUuid: string`                 | Central subscribed to notifications     |
+| `unsubscribe`    | `peer: unknown`, `characteristicUuid: string`                 | Central unsubscribed from notifications |
+| `error`          | `error: Error`                                                | Advertising failed                      |
+| `channelPublish` | `psm: number`, `error: string \| undefined`                   | L2CAP channel published                 |
+| `channelOpen`    | `channel: L2CAPChannel \| null`, `error: string \| undefined` | L2CAP channel opened by a central       |
 
-### `event: 'serviceAdd'`
+| Event           | Arguments                                 | Platform |
+| --------------- | ----------------------------------------- | -------- |
+| `notifySent`    | `deviceAddress: string`, `status: number` | Android  |
+| `readyToUpdate` | _(none)_                                  | Apple    |
 
-Emitted with `uuid` and `error` when a service has been added.
+### Constants
 
-### `event: 'readRequest'`
+#### State
 
-Emitted with `request` when a central reads a characteristic.
+| Constant                    | Value |
+| --------------------------- | ----- |
+| `Server.STATE_UNKNOWN`      | `0`   |
+| `Server.STATE_RESETTING`    | `1`   |
+| `Server.STATE_UNSUPPORTED`  | `2`   |
+| `Server.STATE_UNAUTHORIZED` | `3`   |
+| `Server.STATE_POWERED_OFF`  | `4`   |
+| `Server.STATE_POWERED_ON`   | `5`   |
 
-The `request` object has `handle`, `characteristicUuid`, and `offset` properties on both platforms. On Android it also has a `requestId` property.
+#### Properties
 
-### `event: 'writeRequest'`
+| Constant                                 | Value  |
+| ---------------------------------------- | ------ |
+| `Server.PROPERTY_READ`                   | `0x02` |
+| `Server.PROPERTY_WRITE_WITHOUT_RESPONSE` | `0x04` |
+| `Server.PROPERTY_WRITE`                  | `0x08` |
+| `Server.PROPERTY_NOTIFY`                 | `0x10` |
+| `Server.PROPERTY_INDICATE`               | `0x20` |
 
-Emitted with `requests` when a central writes to a characteristic.
+#### Permissions
 
-Each request has `handle`, `characteristicUuid`, `data`, and `offset` properties. On Android each request additionally has `requestId` and `responseNeeded` properties.
+| Constant                            | Value  |
+| ----------------------------------- | ------ |
+| `Server.PERMISSION_READABLE`        | `0x01` |
+| `Server.PERMISSION_WRITEABLE`       | `0x02` |
+| `Server.PERMISSION_READ_ENCRYPTED`  | `0x04` |
+| `Server.PERMISSION_WRITE_ENCRYPTED` | `0x08` |
 
-### `event: 'subscribe'`
+#### ATT result codes
 
-Emitted when a central subscribes to notifications.
+| Constant                            | Value  |
+| ----------------------------------- | ------ |
+| `Server.ATT_SUCCESS`                | `0x00` |
+| `Server.ATT_INVALID_HANDLE`         | `0x01` |
+| `Server.ATT_READ_NOT_PERMITTED`     | `0x02` |
+| `Server.ATT_WRITE_NOT_PERMITTED`    | `0x03` |
+| `Server.ATT_INSUFFICIENT_RESOURCES` | `0x11` |
+| `Server.ATT_UNLIKELY_ERROR`         | `0x0E` |
 
-The listener receives `characteristicUuid` and a peer identifier whose name differs by platform:
+## `ReadRequest`
 
-- Apple: `centralHandle`, `characteristicUuid`.
-- Android: `deviceAddress`, `characteristicUuid`.
+Represents a read request from a central. Emitted by the `readRequest` event on `Server`. Pass it directly to `server.respondToRequest()`.
 
-### `event: 'unsubscribe'`
+### Properties
 
-Emitted when a central unsubscribes from notifications. Arguments mirror `'subscribe'`.
+| Property             | Type     | Description                           |
+| -------------------- | -------- | ------------------------------------- |
+| `characteristicUuid` | `string` | UUID of the characteristic being read |
+| `offset`             | `number` | Byte offset for the read              |
 
-### `event: 'readyToUpdate'`
+## `WriteRequest`
 
-Apple only. Emitted when the server is ready to send another update after a previous `updateValue()` returned `false`.
+Represents a write request from a central. Emitted as an array by the `writeRequest` event on `Server`. Pass it directly to `server.respondToRequest()`.
 
-### `event: 'advertiseError'`
+### Properties
 
-Android only. Emitted with `errorCode` and `error` when advertising fails.
+| Property             | Type         | Description                              |
+| -------------------- | ------------ | ---------------------------------------- |
+| `characteristicUuid` | `string`     | UUID of the characteristic being written |
+| `offset`             | `number`     | Byte offset for the write                |
+| `data`               | `Uint8Array` | Data being written                       |
+| `responseNeeded`     | `boolean`    | Whether the central expects a response   |
 
-### `event: 'channelPublish'`
+## `L2CAPChannel`
 
-Emitted with `psm` and `error` when an L2CAP channel is published.
+An L2CAP connection-oriented channel. Obtained through the `channelOpen` event on `Server` or `Peripheral`. Extends `Duplex` from [`bare-stream`](https://github.com/holepunchto/bare-stream) and supports standard readable and writable stream operations.
 
-### `event: 'channelOpen'`
+### Properties
 
-Emitted with `channel` and `error` when an L2CAP channel is opened by a central. The `channel` is an `L2CAPChannel` instance.
+| Property | Type             | Description                         |
+| -------- | ---------------- | ----------------------------------- |
+| `psm`    | `number`         | Protocol/Service Multiplexer number |
+| `peer`   | `string \| null` | Peer identifier, or `null`          |
 
-### `event: 'notifySent'`
+## `Service`
 
-Android only. Emitted with `deviceAddress` and `status` when a notification is delivered.
-
-### `Server.STATE_UNKNOWN`
-
-### `Server.STATE_POWERED_ON`
-
-### `Server.STATE_POWERED_OFF`
-
-### `Server.STATE_RESETTING`
-
-### `Server.STATE_UNAUTHORIZED`
-
-### `Server.STATE_UNSUPPORTED`
-
-Apple-only Bluetooth state constants.
-
-### `Server.PROPERTY_READ`
-
-### `Server.PROPERTY_WRITE_WITHOUT_RESPONSE`
-
-### `Server.PROPERTY_WRITE`
-
-### `Server.PROPERTY_NOTIFY`
-
-### `Server.PROPERTY_INDICATE`
-
-Characteristic property flags.
-
-### `Server.PERMISSION_READABLE`
-
-### `Server.PERMISSION_WRITEABLE`
-
-### `Server.PERMISSION_READ_ENCRYPTED`
-
-### `Server.PERMISSION_WRITE_ENCRYPTED`
-
-Characteristic permission flags.
-
-### `Server.ATT_SUCCESS`
-
-### `Server.ATT_INVALID_HANDLE`
-
-### `Server.ATT_READ_NOT_PERMITTED`
-
-### `Server.ATT_WRITE_NOT_PERMITTED`
-
-### `Server.ATT_INSUFFICIENT_RESOURCES`
-
-### `Server.ATT_UNLIKELY_ERROR`
-
-ATT result codes for use with `server.respondToRequest()`.
-
-## L2CAPChannel
-
-### `const channel = new L2CAPChannel(channelHandle)`
-
-An L2CAP connection-oriented channel. Typically obtained through the `'channelOpen'` event on `Server` or `Peripheral` rather than constructed directly. Extends `Duplex` from [`bare-stream`](https://github.com/holepunchto/bare-stream) and supports standard readable and writable stream operations.
-
-### `channel.psm`
-
-The Protocol/Service Multiplexer number of the channel.
-
-### `channel.peer`
-
-The peer identifier of the channel. On Apple this is the connected peripheral identifier. On Android this is the address of the remote peer, or `null`.
-
-## Service
-
-### `const service = new Service(uuid[, characteristics][, options])`
+### `const service = new Service(uuid[, characteristics[, options]])`
 
 Create a GATT service definition.
 
-Options include:
+| Parameter         | Type               | Default | Description                       |
+| ----------------- | ------------------ | ------- | --------------------------------- |
+| `uuid`            | `string`           |         | Service UUID                      |
+| `characteristics` | `Characteristic[]` | `[]`    | Characteristics for this service  |
+| `options.primary` | `boolean`          | `true`  | Whether this is a primary service |
 
-```js
-options = {
-  primary: true
-}
-```
+### Properties
 
-### `service.uuid`
+| Property          | Type               | Description                              |
+| ----------------- | ------------------ | ---------------------------------------- |
+| `uuid`            | `string`           | UUID of the service                      |
+| `characteristics` | `Characteristic[]` | Characteristics belonging to the service |
+| `primary`         | `boolean`          | Whether this is a primary service        |
 
-The UUID of the service.
-
-### `service.characteristics`
-
-The list of characteristics belonging to the service.
-
-### `service.primary`
-
-Whether the service is a primary service.
-
-## Characteristic
+## `Characteristic`
 
 ### `const characteristic = new Characteristic(uuid[, options])`
 
 Create a GATT characteristic definition.
 
-Options include:
+| Parameter                      | Type                 | Default | Description                                                      |
+| ------------------------------ | -------------------- | ------- | ---------------------------------------------------------------- |
+| `uuid`                         | `string`             |         | Characteristic UUID                                              |
+| `options.read`                 | `boolean`            | `false` | Enable read property                                             |
+| `options.write`                | `boolean`            | `false` | Enable write property                                            |
+| `options.writeWithoutResponse` | `boolean`            | `false` | Enable write-without-response property                           |
+| `options.notify`               | `boolean`            | `false` | Enable notify property                                           |
+| `options.indicate`             | `boolean`            | `false` | Enable indicate property                                         |
+| `options.permissions`          | `number \| null`     | `null`  | Explicit permission bitmask. If `null`, inferred from properties |
+| `options.value`                | `Uint8Array \| null` | `null`  | Static value                                                     |
 
-```js
-options = {
-  read: false,
-  write: false,
-  writeWithoutResponse: false,
-  notify: false,
-  indicate: false,
-  permissions: null,
-  value: null
-}
-```
+### Properties
 
-Setting `read`, `write`, `writeWithoutResponse`, `notify`, or `indicate` to `true` enables the corresponding characteristic property. If `permissions` is `null`, permissions are inferred from the properties.
+| Property      | Type                 | Description                                   |
+| ------------- | -------------------- | --------------------------------------------- |
+| `uuid`        | `string`             | UUID of the characteristic                    |
+| `properties`  | `number`             | Bitmask of characteristic properties          |
+| `permissions` | `number \| null`     | Bitmask of permissions, or `null` if inferred |
+| `value`       | `Uint8Array \| null` | Static value (read/write)                     |
 
-### `characteristic.uuid`
+### Constants
 
-The UUID of the characteristic.
-
-### `characteristic.properties`
-
-The bitmask of characteristic properties.
-
-### `characteristic.permissions`
-
-The bitmask of characteristic permissions, or `null` if permissions are inferred from properties.
-
-### `characteristic.value`
-
-The static value of the characteristic, or `null`.
-
-### `Characteristic.PROPERTY_READ`
-
-### `Characteristic.PROPERTY_WRITE_WITHOUT_RESPONSE`
-
-### `Characteristic.PROPERTY_WRITE`
-
-### `Characteristic.PROPERTY_NOTIFY`
-
-### `Characteristic.PROPERTY_INDICATE`
-
-Android-only characteristic property constants exposed on `Characteristic`. On Apple the equivalent flags live on `Server`.
+| Constant                                         | Value  |
+| ------------------------------------------------ | ------ |
+| `Characteristic.PROPERTY_READ`                   | `0x02` |
+| `Characteristic.PROPERTY_WRITE_WITHOUT_RESPONSE` | `0x04` |
+| `Characteristic.PROPERTY_WRITE`                  | `0x08` |
+| `Characteristic.PROPERTY_NOTIFY`                 | `0x10` |
+| `Characteristic.PROPERTY_INDICATE`               | `0x20` |
 
 ## License
 
