@@ -184,8 +184,7 @@ Destroy the central manager and release all resources.
 | `stateChange` | `state: BluetoothState`            | Bluetooth adapter state changed        |
 | `discover`    | `peripheral: DiscoveredPeripheral` | A peripheral was found during scanning |
 | `connect`     | `peripheral: Peripheral`           | Connection to a peripheral established |
-| `disconnect`  | `peripheral: Peripheral \| null`   | A peripheral disconnected              |
-| `connectFail` | `id: string`                       | A connection attempt failed            |
+| `disconnect`  | `peripheral: Peripheral \| null`   | A peripheral disconnected cleanly      |
 | `error`       | `error: Error`                     | An error occurred                      |
 
 ### Constants

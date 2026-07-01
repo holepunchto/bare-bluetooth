@@ -59,7 +59,6 @@ export interface CentralEventMap extends EventMap {
   discover: [peripheral: DiscoveredPeripheral]
   connect: [peripheral: Peripheral]
   disconnect: [peripheral: Peripheral | null]
-  connectFail: [id: string]
   error: [error: Error]
 }
 
