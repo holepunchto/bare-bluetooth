@@ -58,37 +58,34 @@ export interface CentralEventMap extends EventMap {
   stateChange: [state: BluetoothState]
   discover: [peripheral: DiscoveredPeripheral]
   connect: [peripheral: Peripheral]
-  disconnect: [peripheral: Peripheral | null, error?: string]
-  connectFail: [id: string, error: string]
+  disconnect: [peripheral: Peripheral | null]
+  connectFail: [id: string]
   error: [error: Error]
 }
 
 export interface PeripheralEventMap extends EventMap {
-  servicesDiscover: [services: Service[] | null, error: string | null]
-  characteristicsDiscover: [
-    service: Service | null,
-    characteristics: Characteristic[] | null,
-    error: string | null
-  ]
-  read: [characteristic: Characteristic | null, data: Uint8Array | null, error: string | null]
-  write: [characteristic: Characteristic | null, error: string | null]
-  notify: [characteristic: Characteristic | null, data: Uint8Array | null, error: string | null]
-  notifyState: [characteristic: Characteristic | null, isNotifying: boolean, error: string | null]
-  disconnect: [error: string | null]
-  channelOpen: [channel: L2CAPChannel | null, error: string | null]
-  mtuChanged: [mtu: number, error: string | null]
+  servicesDiscover: [services: Service[]]
+  characteristicsDiscover: [service: Service | null, characteristics: Characteristic[]]
+  read: [characteristic: Characteristic, data: Uint8Array]
+  write: [characteristic: Characteristic]
+  notify: [characteristic: Characteristic, data: Uint8Array]
+  notifyState: [characteristic: Characteristic, isNotifying: boolean]
+  disconnect: []
+  channelOpen: [channel: L2CAPChannel]
+  mtuChanged: [mtu: number]
+  error: [error: Error]
 }
 
 export interface ServerEventMap extends EventMap {
   stateChange: [state: BluetoothState]
-  serviceAdd: [uuid: string, error?: string]
+  serviceAdd: [uuid: string]
   readRequest: [request: ReadRequest]
   writeRequest: [requests: WriteRequest[]]
   subscribe: [peer: unknown, characteristicUuid: string]
   unsubscribe: [peer: unknown, characteristicUuid: string]
   error: [error: Error]
-  channelPublish: [psm: number, error?: string]
-  channelOpen: [channel: L2CAPChannel | null, error?: string]
+  channelPublish: [psm: number]
+  channelOpen: [channel: L2CAPChannel]
   readyToUpdate: []
   notifySent: [deviceAddress: string, status: number]
 }
