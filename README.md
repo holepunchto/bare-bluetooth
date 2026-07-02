@@ -38,9 +38,7 @@ server.on('stateChange', (state) => {
   server.addService(new Service(SERVICE_UUID, [pingChar]))
 })
 
-server.on('serviceAdd', (uuid, error) => {
-  if (error) return
-
+server.on('serviceAdd', (uuid) => {
   server.startAdvertising({
     name: 'MyDevice',
     serviceUUIDs: [SERVICE_UUID]
@@ -181,17 +179,13 @@ Destroy the central manager and release all resources.
 
 ### Events
 
-| Event         | Arguments                                                 | Description                            |
-| ------------- | --------------------------------------------------------- | -------------------------------------- |
-| `stateChange` | `state: BluetoothState`                                   | Bluetooth adapter state changed        |
-| `discover`    | `peripheral: DiscoveredPeripheral`                        | A peripheral was found during scanning |
-| `connect`     | `peripheral: Peripheral`                                  | Connection to a peripheral established |
-| `disconnect`  | `peripheral: Peripheral \| null`, `error: string \| null` | A peripheral disconnected              |
-| `connectFail` | `id: string`, `error: string`                             | A connection attempt failed            |
-
-| Event   | Arguments      | Platform |
-| ------- | -------------- | -------- |
-| `error` | `error: Error` | Android  |
+| Event         | Arguments                          | Description                            |
+| ------------- | ---------------------------------- | -------------------------------------- |
+| `stateChange` | `state: BluetoothState`            | Bluetooth adapter state changed        |
+| `discover`    | `peripheral: DiscoveredPeripheral` | A peripheral was found during scanning |
+| `connect`     | `peripheral: Peripheral`           | Connection to a peripheral established |
+| `disconnect`  | `peripheral: Peripheral \| null`   | A peripheral disconnected cleanly      |
+| `error`       | `error: Error`                     | An error occurred                      |
 
 ### Constants
 
@@ -267,20 +261,21 @@ Destroy the peripheral instance and release resources.
 
 ### Events
 
-| Event                     | Arguments                                                                                        | Description                              |
-| ------------------------- | ------------------------------------------------------------------------------------------------ | ---------------------------------------- |
-| `servicesDiscover`        | `services: Service[] \| null`, `error: string \| null`                                           | Services discovered                      |
-| `characteristicsDiscover` | `service: Service \| null`, `characteristics: Characteristic[] \| null`, `error: string \| null` | Characteristics discovered for a service |
-| `read`                    | `characteristic: Characteristic \| null`, `data: Uint8Array \| null`, `error: string \| null`    | Characteristic value read                |
-| `write`                   | `characteristic: Characteristic \| null`, `error: string \| null`                                | Characteristic write completed           |
-| `notify`                  | `characteristic: Characteristic \| null`, `data: Uint8Array \| null`, `error: string \| null`    | Notification received                    |
-| `notifyState`             | `characteristic: Characteristic \| null`, `isNotifying: boolean`, `error: string \| null`        | Notification state changed               |
-| `channelOpen`             | `channel: L2CAPChannel \| null`, `error: string \| null`                                         | L2CAP channel opened                     |
+| Event                     | Arguments                                                       | Description                              |
+| ------------------------- | --------------------------------------------------------------- | ---------------------------------------- |
+| `servicesDiscover`        | `services: Service[]`                                           | Services discovered                      |
+| `characteristicsDiscover` | `service: Service \| null`, `characteristics: Characteristic[]` | Characteristics discovered for a service |
+| `read`                    | `characteristic: Characteristic`, `data: Uint8Array`            | Characteristic value read                |
+| `write`                   | `characteristic: Characteristic`                                | Characteristic write completed           |
+| `notify`                  | `characteristic: Characteristic`, `data: Uint8Array`            | Notification received                    |
+| `notifyState`             | `characteristic: Characteristic`, `isNotifying: boolean`        | Notification state changed               |
+| `channelOpen`             | `channel: L2CAPChannel`                                         | L2CAP channel opened                     |
+| `error`                   | `error: Error`                                                  | An error occurred                        |
 
-| Event        | Arguments                              | Platform |
-| ------------ | -------------------------------------- | -------- |
-| `disconnect` | `error: string \| null`                | Android  |
-| `mtuChanged` | `mtu: number`, `error: string \| null` | Android  |
+| Event        | Arguments     | Platform |
+| ------------ | ------------- | -------- |
+| `disconnect` | _(none)_      | Android  |
+| `mtuChanged` | `mtu: number` | Android  |
 
 ### Constants
 
@@ -354,17 +349,17 @@ Destroy the server and release all resources.
 
 ### Events
 
-| Event            | Arguments                                                     | Description                             |
-| ---------------- | ------------------------------------------------------------- | --------------------------------------- |
-| `stateChange`    | `state: BluetoothState`                                       | Bluetooth adapter state changed         |
-| `serviceAdd`     | `uuid: string`, `error: string \| undefined`                  | Service registered                      |
-| `readRequest`    | `request: ReadRequest`                                        | Central read a characteristic           |
-| `writeRequest`   | `requests: WriteRequest[]`                                    | Central wrote to a characteristic       |
-| `subscribe`      | `peer: unknown`, `characteristicUuid: string`                 | Central subscribed to notifications     |
-| `unsubscribe`    | `peer: unknown`, `characteristicUuid: string`                 | Central unsubscribed from notifications |
-| `error`          | `error: Error`                                                | Advertising failed                      |
-| `channelPublish` | `psm: number`, `error: string \| undefined`                   | L2CAP channel published                 |
-| `channelOpen`    | `channel: L2CAPChannel \| null`, `error: string \| undefined` | L2CAP channel opened by a central       |
+| Event            | Arguments                                     | Description                             |
+| ---------------- | --------------------------------------------- | --------------------------------------- |
+| `stateChange`    | `state: BluetoothState`                       | Bluetooth adapter state changed         |
+| `serviceAdd`     | `uuid: string`                                | Service registered                      |
+| `readRequest`    | `request: ReadRequest`                        | Central read a characteristic           |
+| `writeRequest`   | `requests: WriteRequest[]`                    | Central wrote to a characteristic       |
+| `subscribe`      | `peer: unknown`, `characteristicUuid: string` | Central subscribed to notifications     |
+| `unsubscribe`    | `peer: unknown`, `characteristicUuid: string` | Central unsubscribed from notifications |
+| `error`          | `error: Error`                                | An error occurred                       |
+| `channelPublish` | `psm: number`                                 | L2CAP channel published                 |
+| `channelOpen`    | `channel: L2CAPChannel`                       | L2CAP channel opened by a central       |
 
 | Event           | Arguments                                 | Platform |
 | --------------- | ----------------------------------------- | -------- |
