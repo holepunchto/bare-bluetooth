@@ -363,6 +363,10 @@ Destroy the server and release all resources.
 
 | Event           | Arguments                                 | Platform |
 | --------------- | ----------------------------------------- | -------- |
+| `connecting`    | `deviceAddress: string`                   | Android  |
+| `connected`     | `deviceAddress: string`                   | Android  |
+| `disconnecting` | `deviceAddress: string`                   | Android  |
+| `disconnected`  | `deviceAddress: string`                   | Android  |
 | `notifySent`    | `deviceAddress: string`, `status: number` | Android  |
 | `readyToUpdate` | _(none)_                                  | Apple    |
 
@@ -378,6 +382,15 @@ Destroy the server and release all resources.
 | `Server.STATE_UNAUTHORIZED` | `3`   |
 | `Server.STATE_POWERED_OFF`  | `4`   |
 | `Server.STATE_POWERED_ON`   | `5`   |
+
+#### Connection state (Android)
+
+| Constant                                | Value |
+| --------------------------------------- | ----- |
+| `Server.CONNECTION_STATE_DISCONNECTED`  | `0`   |
+| `Server.CONNECTION_STATE_CONNECTING`    | `1`   |
+| `Server.CONNECTION_STATE_CONNECTED`     | `2`   |
+| `Server.CONNECTION_STATE_DISCONNECTING` | `3`   |
 
 #### Properties
 

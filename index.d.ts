@@ -85,6 +85,10 @@ export interface ServerEventMap extends EventMap {
   error: [error: Error]
   channelPublish: [psm: number]
   channelOpen: [channel: L2CAPChannel]
+  connecting: [deviceAddress: string]
+  connected: [deviceAddress: string]
+  disconnecting: [deviceAddress: string]
+  disconnected: [deviceAddress: string]
   readyToUpdate: []
   notifySent: [deviceAddress: string, status: number]
 }
@@ -163,6 +167,11 @@ export class Server extends EventEmitter<ServerEventMap> {
   static readonly PERMISSION_WRITEABLE: number
   static readonly PERMISSION_READ_ENCRYPTED: number
   static readonly PERMISSION_WRITE_ENCRYPTED: number
+
+  static readonly CONNECTION_STATE_DISCONNECTED: number
+  static readonly CONNECTION_STATE_CONNECTING: number
+  static readonly CONNECTION_STATE_CONNECTED: number
+  static readonly CONNECTION_STATE_DISCONNECTING: number
 
   static readonly ATT_SUCCESS: number
   static readonly ATT_INVALID_HANDLE: number
