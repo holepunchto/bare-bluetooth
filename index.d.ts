@@ -98,16 +98,24 @@ export class Central extends EventEmitter<CentralEventMap> {
 
   readonly state: BluetoothState
 
-  startScan(serviceUUIDs?: string[], opts?: { scanMode?: number }): void
+  startScan(
+    serviceUUIDs?: string[],
+    opts?: { allowDuplicates?: boolean; scanMode?: number; callbackType?: number }
+  ): void
   stopScan(): void
   connect(peripheral: DiscoveredPeripheral): void
   disconnect(peripheral: Peripheral): void
   destroy(): void
 
-  static readonly SCAN_MODE_OPPORTUNISTIC: number
-  static readonly SCAN_MODE_LOW_POWER: number
-  static readonly SCAN_MODE_BALANCED: number
-  static readonly SCAN_MODE_LOW_LATENCY: number
+  // Android only, undefined on other platforms
+  static readonly SCAN_MODE_OPPORTUNISTIC: number | undefined
+  static readonly SCAN_MODE_LOW_POWER: number | undefined
+  static readonly SCAN_MODE_BALANCED: number | undefined
+  static readonly SCAN_MODE_LOW_LATENCY: number | undefined
+
+  static readonly CALLBACK_TYPE_ALL_MATCHES: number | undefined
+  static readonly CALLBACK_TYPE_FIRST_MATCH: number | undefined
+  static readonly CALLBACK_TYPE_MATCH_LOST: number | undefined
 }
 
 export class Peripheral extends EventEmitter<PeripheralEventMap> {
