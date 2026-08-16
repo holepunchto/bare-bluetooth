@@ -103,7 +103,27 @@ export class Central extends EventEmitter<CentralEventMap> {
     opts?: { allowDuplicates?: boolean; scanMode?: number; callbackType?: number }
   ): void
   stopScan(): void
+  /**
+   * Peripherals the adapter can resolve without scanning.
+   *
+   * On linux and android these are the bonded devices and `ids` merely filters
+   * them. On apple `ids` (or `services`) is **required** and throws if omitted:
+   * CoreBluetooth identifiers are per host and per application, and there is no
+   * API to list everything previously connected.
+   */
+  knownPeripherals(opts?: {
+    ids?: string[]
+    /** Apple only: match peripherals the system already has connected. */
+    services?: string[]
+  }): DiscoveredPeripheral[]
   connect(peripheral: DiscoveredPeripheral): void
+  /**
+   * Connect to a known peripheral without scanning for it first.
+   *
+   * The id is whatever `DiscoveredPeripheral.id` reports on the platform: a MAC
+   * address on linux and android, a CoreBluetooth UUID on apple.
+   */
+  connectById(id: string): void
   disconnect(peripheral: Peripheral): void
   destroy(): void
 

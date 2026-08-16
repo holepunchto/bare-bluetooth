@@ -10,7 +10,8 @@
     "#bluetooth": {
       "android": "./lib/android.js",
       "darwin": "./lib/apple.js",
-      "ios": "./lib/apple.js"
+      "ios": "./lib/apple.js",
+      "linux": "./lib/linux.js"
     }
   },
   "files": [
@@ -18,6 +19,7 @@
     "lib"
   ],
   "scripts": {
+    "test": "brittle-bare test.js",
     "format": "prettier --write . && lunte --fix",
     "lint": "prettier --check . && lunte"
   },
@@ -33,9 +35,13 @@
   "homepage": "https://github.com/holepunchto/bare-bluetooth#readme",
   "dependencies": {
     "bare-bluetooth-android": "^0.6.0",
-    "bare-bluetooth-apple": "^0.4.0"
+    "bare-bluetooth-apple": "^0.4.0",
+    "bare-bluetooth-linux": "^0.2.0",
+    "bare-events": "^2.8.2"
   },
   "devDependencies": {
+    "bare-os": "^3.9.1",
+    "brittle": "^4.1.0",
     "lunte": "^1.7.0",
     "prettier": "^3.9.1",
     "prettier-config-holepunch": "^2.0.0"

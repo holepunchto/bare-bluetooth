@@ -115,6 +115,56 @@ The package resolves to a platform-specific implementation:
 
 - `android` resolves to [`bare-bluetooth-android`](https://github.com/holepunchto/bare-bluetooth-android)
 - `darwin` and `ios` resolve to [`bare-bluetooth-apple`](https://github.com/holepunchto/bare-bluetooth-apple)
+- `linux` resolves to [`bare-bluetooth-linux`](https://github.com/holepunchto/bare-bluetooth-linux)
+
+### Linux (BlueZ) notes
+
+- Only `'poweredOff'` and `'poweredOn'` occur, and BlueZ surfaces no adapter
+  power-change signal, so the state is read on use. Pass `pollInterval` to the
+  `Central` constructor if you need live transitions.
+- `discoverServices` and `discoverCharacteristics` resolve against BlueZ's
+  implicit GATT resolution and apply the UUID filter client side.
+- `requestMtu` is a no-op; BlueZ negotiates the MTU and exposes the result per
+  characteristic.
+- `Server` and `L2CAPChannel` throw; only the central role is implemented.
+
+## Connecting without scanning
+
+A bonded peripheral is often not advertising — a wearable that is asleep, or a
+keyboard already known to the OS. `knownPeripherals()` resolves peripherals the
+adapter knows about without a scan, and `connectById()` connects straight to one.
+
+```js
+// linux, android: no argument needed
+for (const peripheral of central.knownPeripherals()) {
+  console.log(peripheral.id, peripheral.name)
+}
+
+central.connectById('FF:C3:EB:B3:10:62')
+```
+
+**This is not symmetric across platforms, and it cannot be.**
+
+| Platform | Enumerate without hints               | `id` is            |
+| -------- | ------------------------------------- | ------------------ |
+| Linux    | Yes, all bonded devices               | MAC address        |
+| Android  | Yes, all bonded devices               | MAC address        |
+| Apple    | **No** — `ids` or `services` required | CoreBluetooth UUID |
+
+CoreBluetooth has no MAC addresses and deliberately offers no way to list
+everything previously connected: identifiers are per host _and_ per application,
+and persisting them is the application's job. So on Apple you must scan once,
+store `peripheral.id`, and pass it back:
+
+```js
+const known = central.knownPeripherals({ ids: [savedId] })
+
+// Or find peripherals the system already has connected, even via another app:
+const connected = central.knownPeripherals({ services: ['180f'] })
+```
+
+Calling `knownPeripherals()` with no arguments **throws** on Apple rather than
+silently returning an empty array.
 
 ## Types
 
@@ -122,16 +172,16 @@ The package resolves to a platform-specific implementation:
 
 A string describing the current Bluetooth adapter state.
 
-| Value            | Platforms      |
-| ---------------- | -------------- |
-| `'unknown'`      | Apple          |
-| `'resetting'`    | Apple          |
-| `'unsupported'`  | Apple          |
-| `'unauthorized'` | Apple          |
-| `'poweredOff'`   | Android, Apple |
-| `'poweredOn'`    | Android, Apple |
-| `'turningOn'`    | Android        |
-| `'turningOff'`   | Android        |
+| Value            | Platforms             |
+| ---------------- | --------------------- |
+| `'unknown'`      | Apple                 |
+| `'resetting'`    | Apple                 |
+| `'unsupported'`  | Apple                 |
+| `'unauthorized'` | Apple                 |
+| `'poweredOff'`   | Android, Apple, Linux |
+| `'poweredOn'`    | Android, Apple, Linux |
+| `'turningOn'`    | Android               |
+| `'turningOff'`   | Android               |
 
 ## API
 
