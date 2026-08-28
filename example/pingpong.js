@@ -92,7 +92,7 @@ function connect(psm) {
 
 function rally(channel, serves) {
   channel.on('data', (data) => {
-    const received = data.toString()
+    const received = Buffer.from(data).toString()
     console.log('<', received)
 
     const reply = received === 'ping' ? 'pong' : 'ping'
