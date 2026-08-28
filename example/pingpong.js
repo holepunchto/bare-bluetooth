@@ -2,6 +2,12 @@ const { Central, Server } = require('..')
 
 const NAME = 'bare-pingpong'
 
+// Peers are matched on this rather than on NAME: a name only reaches the other
+// side reliably once connected, but an advertised service UUID always does.
+// Kept in the Bluetooth base range so it costs 2 bytes of advertising budget
+// instead of 16.
+const SERVICE_UUID = '0000f00d-0000-1000-8000-00805f9b34fb'
+
 const role = Bare.argv[2]
 const psm = Number(Bare.argv[3])
 
@@ -21,7 +27,8 @@ function listen() {
     if (state !== 'poweredOn') return
 
     server.publishChannel()
-    server.startAdvertising({ name: NAME })
+    server.startAdvertising({ name: NAME, serviceUUIDs: [SERVICE_UUID] })
+    console.log('advertising', SERVICE_UUID)
   })
 
   server.on('channelPublish', (psm) => {
@@ -41,15 +48,28 @@ function connect(psm) {
   const central = new Central()
   let connecting = false
 
+  // Nothing advertising the service looks exactly like a hung scan, so say so
+  // rather than sit there quietly.
+  let searching = null
+
   central.on('stateChange', (state) => {
     console.log('state:', state)
-    if (state === 'poweredOn') central.startScan()
+    if (state !== 'poweredOn') return
+
+    console.log('scanning for', SERVICE_UUID)
+    central.startScan([SERVICE_UUID])
+
+    searching = setTimeout(() => {
+      console.error('nothing advertising that service after 20s')
+      console.error('is "bare example/pingpong.js listen" still running on the other machine?')
+    }, 20000)
   })
 
   central.on('discover', (discovered) => {
-    if (discovered.name !== NAME || connecting) return
+    if (connecting) return
 
     connecting = true
+    clearTimeout(searching)
     console.log('found:', discovered.id, discovered.rssi)
     central.stopScan()
     central.connect(discovered)
