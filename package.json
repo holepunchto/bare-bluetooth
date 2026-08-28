@@ -10,7 +10,8 @@
     "#bluetooth": {
       "android": "./lib/android.js",
       "darwin": "./lib/apple.js",
-      "ios": "./lib/apple.js"
+      "ios": "./lib/apple.js",
+      "linux": "./lib/linux.js"
     }
   },
   "files": [
@@ -33,7 +34,8 @@
   "homepage": "https://github.com/holepunchto/bare-bluetooth#readme",
   "dependencies": {
     "bare-bluetooth-android": "^0.6.0",
-    "bare-bluetooth-apple": "^0.4.0"
+    "bare-bluetooth-apple": "^0.4.0",
+    "bare-bluetooth-linux": "^0.2.0"
   },
   "devDependencies": {
     "lunte": "^1.7.0",
