@@ -465,10 +465,12 @@ An L2CAP connection-oriented channel. Obtained through the `channelOpen` event o
 
 ### Properties
 
-| Property | Type             | Description                         |
-| -------- | ---------------- | ----------------------------------- |
-| `psm`    | `number`         | Protocol/Service Multiplexer number |
-| `peer`   | `string \| null` | Peer identifier, or `null`          |
+| Property | Type             | Description                                    |
+| -------- | ---------------- | ---------------------------------------------- |
+| `psm`    | `number`         | Protocol/Service Multiplexer number            |
+| `peer`   | `string \| null` | Remote device identifier, or `null` if unknown |
+
+The value of `peer` is platform-specific. On Apple it is the OS-assigned peer UUID (`CBPeer.identifier`); the system hides the real Bluetooth address. On Android it is the remote device's Bluetooth address (e.g. `AA:BB:CC:DD:EE:FF`). It matches the identifier reported by device discovery on the same platform, so it can be used to correlate an accepted channel with a known device.
 
 ## `Service`
 
