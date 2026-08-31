@@ -14,7 +14,7 @@ export type BluetoothState =
 export interface DiscoveredPeripheral {
   id: string
   name: string | null
-  rssi: number
+  rssi: number | null
   serviceData: { [uuid: string]: Uint8Array } | null
 }
 

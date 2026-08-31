@@ -164,7 +164,9 @@ options = {
 
 Each option goes to the platform that understands it. Both platforms decide how often `discover` fires, but spell it differently, so set both to get the same behaviour everywhere.
 
-Set `allowDuplicates` (Apple) to `true` for a `discover` on every advertising packet, or `false` for one per scan.
+Set `allowDuplicates` (Apple) to `true` for a `discover` on every advertising packet. `false` asks CoreBluetooth to coalesce them, which it only does as a best effort: a peripheral still turns up several times per scan.
+
+`discover` reports what the platform reports, with no filtering of its own. Key peripherals by `id`, keep the latest, and de-duplicate there if you need to.
 
 Set `transport` (Linux) to `'le'` (default), `'auto'`, or `'bredr'`. `'auto'` also scans classic, where dual-mode devices such as TVs advertise their name, but slows BLE discovery; a dual-mode device shows up once per channel, and only the BLE one can be connected.
 
