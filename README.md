@@ -157,13 +157,20 @@ Start scanning for peripherals. If `serviceUUIDs` is provided, only peripherals 
 options = {
   allowDuplicates: false, // Apple only
   scanMode: Central.SCAN_MODE_LOW_LATENCY, // Android only
-  callbackType: Central.CALLBACK_TYPE_FIRST_MATCH // Android only
+  callbackType: Central.CALLBACK_TYPE_FIRST_MATCH, // Android only
+  transport: 'le' // Linux only
 }
 ```
 
 Each option goes to the platform that understands it. Both platforms decide how often `discover` fires, but spell it differently, so set both to get the same behaviour everywhere.
 
-Set `allowDuplicates` (Apple) to `true` for a `discover` on every advertising packet, or `false` for one per scan.
+Set `allowDuplicates` (Apple) to `true` for a `discover` on every advertising packet. `false` asks CoreBluetooth to coalesce them, which it only does as a best effort: a peripheral still turns up several times per scan.
+
+`discover` reports what the platform reports, with no filtering of its own. Key peripherals by `id`, keep the latest, and de-duplicate there if you need to.
+
+Set `transport` (Linux) to `'le'` (default), `'auto'`, or `'bredr'`. `'auto'` also scans classic, where dual-mode devices such as TVs advertise their name, but slows BLE discovery; a dual-mode device shows up once per channel, and only the BLE one can be connected.
+
+On Linux the name may arrive after the first `discover`; when it does, `discover` fires again with `name` set. Key peripherals by `id` and keep the latest.
 
 Set `callbackType` (Android) to one of `Central.CALLBACK_TYPE_ALL_MATCHES`, `Central.CALLBACK_TYPE_FIRST_MATCH`, or `Central.CALLBACK_TYPE_MATCH_LOST`. `ALL_MATCHES` is the default and fires on every advertising packet, dozens per second per peripheral. `FIRST_MATCH` fires once per peripheral, but needs `serviceUUIDs` and hardware support: without it the scan fails with an `error`, so keep a fallback. It also stops `rssi` refreshing.
 
@@ -326,7 +333,7 @@ Start advertising the server.
 options = {
   name: null,
   serviceUUIDs: null,
-  serviceData: null // Apple only
+  serviceData: null // Apple and Linux only
 }
 ```
 
