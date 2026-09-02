@@ -333,7 +333,7 @@ Start advertising the server.
 options = {
   name: null,
   serviceUUIDs: null,
-  serviceData: null // Apple only
+  serviceData: null // Apple and Linux only
 }
 ```
 

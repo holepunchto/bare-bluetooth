@@ -35,7 +35,7 @@
   "dependencies": {
     "bare-bluetooth-android": "^0.6.0",
     "bare-bluetooth-apple": "^0.4.0",
-    "bare-bluetooth-linux": "^0.4.1"
+    "bare-bluetooth-linux": "^0.5.0"
   },
   "devDependencies": {
     "lunte": "^1.7.0",
