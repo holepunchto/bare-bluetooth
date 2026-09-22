@@ -10,18 +10,18 @@ Scans for 10 seconds and prints what it sees. The quickest way to tell whether a
 bare example/scan.js
 ```
 
-## pingpong.js
+## l2cappong.js
 
 Two machines bouncing a message over an L2CAP channel, one second apart. Exercises advertising, scanning, connecting and duplex streaming in one go.
 
 The listener advertises itself and prints the PSM its channel landed on. Neither CoreBluetooth nor BlueZ lets you pick that number, so it has to reach the other side by hand.
 
 ```
-bare example/pingpong.js listen
+bare example/l2cappong.js listen
 ```
 
 ```
-bare example/pingpong.js connect <psm>
+bare example/l2cappong.js connect <psm>
 ```
 
 Runs on every platform.

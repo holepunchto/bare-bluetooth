@@ -1,6 +1,6 @@
 const { Central, Server } = require('..')
 
-const NAME = 'bare-pingpong'
+const NAME = 'bare-l2cappong'
 
 // Peers are matched on this rather than on NAME: a name only reaches the other
 // side reliably once connected, but an advertised service UUID always does.
@@ -14,8 +14,8 @@ const psm = Number(Bare.argv[3])
 if (role === 'listen') listen()
 else if (role === 'connect' && psm) connect(psm)
 else {
-  console.error('usage: bare example/pingpong.js listen')
-  console.error('       bare example/pingpong.js connect <psm>')
+  console.error('usage: bare example/l2cappong.js listen')
+  console.error('       bare example/l2cappong.js connect <psm>')
   Bare.exit(1)
 }
 
@@ -33,7 +33,7 @@ function listen() {
 
   server.on('channelPublish', (psm) => {
     console.log(`listening on psm ${psm}, advertising as "${NAME}"`)
-    console.log(`run: bare example/pingpong.js connect ${psm}`)
+    console.log(`run: bare example/l2cappong.js connect ${psm}`)
   })
 
   server.on('channelOpen', (channel) => {
@@ -61,7 +61,7 @@ function connect(psm) {
 
     searching = setTimeout(() => {
       console.error('nothing advertising that service after 20s')
-      console.error('is "bare example/pingpong.js listen" still running on the other machine?')
+      console.error('is "bare example/l2cappong.js listen" still running on the other machine?')
     }, 20000)
   })
 
