@@ -7,6 +7,19 @@ const NAME = 'bare-gattpong'
 const SERVICE_UUID = '0000ca11-0000-1000-8000-00805f9b34fb'
 const CHARACTERISTIC_UUID = '0000ca12-0000-1000-8000-00805f9b34fb'
 
+// CoreBluetooth reports UUIDs uppercase, and Bluetooth-base ones in their
+// 16-bit short form; BlueZ and Android report them long and lowercase.
+function same(uuid, other) {
+  return expand(uuid) === expand(other)
+}
+
+function expand(uuid) {
+  uuid = uuid.toLowerCase()
+  if (uuid.length === 4) return `0000${uuid}-0000-1000-8000-00805f9b34fb`
+  if (uuid.length === 8) return `${uuid}-0000-1000-8000-00805f9b34fb`
+  return uuid
+}
+
 const role = Bare.argv[2]
 
 if (role === 'listen') listen()
@@ -35,7 +48,7 @@ function listen() {
   })
 
   server.on('subscribe', (peer, uuid) => {
-    if (uuid === CHARACTERISTIC_UUID) console.log('central subscribed')
+    if (same(uuid, CHARACTERISTIC_UUID)) console.log('central subscribed')
   })
 
   // The central writes, the server answers with a notification.
@@ -92,13 +105,13 @@ function connect() {
 
     peripheral.on('servicesDiscover', (services) => {
       for (const service of services) {
-        if (service.uuid === SERVICE_UUID) peripheral.discoverCharacteristics(service)
+        if (same(service.uuid, SERVICE_UUID)) peripheral.discoverCharacteristics(service)
       }
     })
 
     peripheral.on('characteristicsDiscover', (service, characteristics) => {
       for (const found of characteristics) {
-        if (found.uuid !== CHARACTERISTIC_UUID) continue
+        if (!same(found.uuid, CHARACTERISTIC_UUID)) continue
         characteristic = found
         peripheral.subscribe(characteristic)
       }
