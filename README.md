@@ -3,7 +3,7 @@
 
 # bare-bluetooth
 
-Bluetooth bindings for Bare. Provides BLE central and peripheral roles, GATT services and characteristics, and L2CAP channels across Apple and Android platforms.
+Bluetooth bindings for Bare. Provides BLE central and peripheral roles, GATT services and characteristics, and L2CAP channels across Apple, Android and Linux.
 
 The module normalizes API differences between platforms so consumer code does not need platform conditionals. State strings, class names, and constants are unified.
 
@@ -115,6 +115,7 @@ The package resolves to a platform-specific implementation:
 
 - `android` resolves to [`bare-bluetooth-android`](https://github.com/holepunchto/bare-bluetooth-android)
 - `darwin` and `ios` resolve to [`bare-bluetooth-apple`](https://github.com/holepunchto/bare-bluetooth-apple)
+- `linux` resolves to [`bare-bluetooth-linux`](https://github.com/holepunchto/bare-bluetooth-linux)
 
 ## Types
 
@@ -122,16 +123,16 @@ The package resolves to a platform-specific implementation:
 
 A string describing the current Bluetooth adapter state.
 
-| Value            | Platforms      |
-| ---------------- | -------------- |
-| `'unknown'`      | Apple          |
-| `'resetting'`    | Apple          |
-| `'unsupported'`  | Apple          |
-| `'unauthorized'` | Apple          |
-| `'poweredOff'`   | Android, Apple |
-| `'poweredOn'`    | Android, Apple |
-| `'turningOn'`    | Android        |
-| `'turningOff'`   | Android        |
+| Value            | Platforms             |
+| ---------------- | --------------------- |
+| `'unknown'`      | Apple                 |
+| `'resetting'`    | Apple                 |
+| `'unsupported'`  | Apple                 |
+| `'unauthorized'` | Apple                 |
+| `'poweredOff'`   | Android, Apple, Linux |
+| `'poweredOn'`    | Android, Apple, Linux |
+| `'turningOn'`    | Android               |
+| `'turningOff'`   | Android               |
 
 ## API
 
@@ -292,10 +293,10 @@ Destroy the peripheral instance and release resources.
 | `channelOpen`             | `channel: L2CAPChannel`                                         | L2CAP channel opened                     |
 | `error`                   | `error: Error`                                                  | An error occurred                        |
 
-| Event        | Arguments     | Platform |
-| ------------ | ------------- | -------- |
-| `disconnect` | _(none)_      | Android  |
-| `mtuChanged` | `mtu: number` | Android  |
+| Event        | Arguments     | Platform       |
+| ------------ | ------------- | -------------- |
+| `disconnect` | _(none)_      | Android, Linux |
+| `mtuChanged` | `mtu: number` | Android        |
 
 ### Constants
 
@@ -345,6 +346,8 @@ Stop advertising.
 
 Respond to a `ReadRequest` or `WriteRequest` with the given ATT `result: number` code. Optionally include `data: Uint8Array` for read responses. Use the `Server.ATT_*` constants for `result`.
 
+On Linux, a result BlueZ has no name for (`ATT_INVALID_HANDLE`, `ATT_UNLIKELY_ERROR`, `ATT_INSUFFICIENT_RESOURCES`) reaches the central as application error `0x80`. A read nobody listens for is answered with the characteristic's `value`; a write nobody listens for is accepted.
+
 #### `server.updateValue(characteristic, data)`
 
 Update the value of a `Characteristic` and notify subscribed centrals. `data` is a `Uint8Array`. Returns `true` if the update was sent successfully.
@@ -369,17 +372,19 @@ Destroy the server and release all resources.
 
 ### Events
 
-| Event            | Arguments                                     | Description                             |
-| ---------------- | --------------------------------------------- | --------------------------------------- |
-| `stateChange`    | `state: BluetoothState`                       | Bluetooth adapter state changed         |
-| `serviceAdd`     | `uuid: string`                                | Service registered                      |
-| `readRequest`    | `request: ReadRequest`                        | Central read a characteristic           |
-| `writeRequest`   | `requests: WriteRequest[]`                    | Central wrote to a characteristic       |
-| `subscribe`      | `peer: unknown`, `characteristicUuid: string` | Central subscribed to notifications     |
-| `unsubscribe`    | `peer: unknown`, `characteristicUuid: string` | Central unsubscribed from notifications |
-| `error`          | `error: Error`                                | An error occurred                       |
-| `channelPublish` | `psm: number`                                 | L2CAP channel published                 |
-| `channelOpen`    | `channel: L2CAPChannel`                       | L2CAP channel opened by a central       |
+| Event          | Arguments                                     | Description                             |
+| -------------- | --------------------------------------------- | --------------------------------------- |
+| `stateChange`  | `state: BluetoothState`                       | Bluetooth adapter state changed         |
+| `serviceAdd`   | `uuid: string`                                | Service registered                      |
+| `readRequest`  | `request: ReadRequest`                        | Central read a characteristic           |
+| `writeRequest` | `requests: WriteRequest[]`                    | Central wrote to a characteristic       |
+| `subscribe`    | `peer: unknown`, `characteristicUuid: string` | Central subscribed to notifications     |
+| `unsubscribe`  | `peer: unknown`, `characteristicUuid: string` | Central unsubscribed from notifications |
+
+`peer` is `null` on Linux: BlueZ does not say which central toggled notifications.
+| `error` | `error: Error` | An error occurred |
+| `channelPublish` | `psm: number` | L2CAP channel published |
+| `channelOpen` | `channel: L2CAPChannel` | L2CAP channel opened by a central |
 
 | Event           | Arguments                                 | Platform |
 | --------------- | ----------------------------------------- | -------- |

@@ -24,4 +24,16 @@ bare example/pingpong.js listen
 bare example/pingpong.js connect <psm>
 ```
 
-The GATT server is still missing on Linux, but advertising and L2CAP are not, so this runs on every platform.
+Runs on every platform.
+
+## gattpong.js
+
+The same rally over GATT instead of L2CAP. The listener publishes one characteristic that can be written and subscribed to; the other side scans, connects, subscribes, writes "ping" and gets "pong" back as a notification, one second apart. No PSM to carry across this time: the service UUID is enough to find each other.
+
+```
+bare example/gattpong.js listen
+```
+
+```
+bare example/gattpong.js connect
+```
