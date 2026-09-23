@@ -372,17 +372,17 @@ Destroy the server and release all resources.
 
 ### Events
 
-| Event          | Arguments                                     | Description                             |
-| -------------- | --------------------------------------------- | --------------------------------------- |
-| `stateChange`  | `state: BluetoothState`                       | Bluetooth adapter state changed         |
-| `serviceAdd`   | `uuid: string`                                | Service registered                      |
-| `readRequest`  | `request: ReadRequest`                        | Central read a characteristic           |
-| `writeRequest` | `requests: WriteRequest[]`                    | Central wrote to a characteristic       |
-| `subscribe`    | `peer: unknown`, `characteristicUuid: string` | Central subscribed to notifications     |
-| `unsubscribe`  | `peer: unknown`, `characteristicUuid: string` | Central unsubscribed from notifications |
-| `error` | `error: Error` | An error occurred |
-| `channelPublish` | `psm: number` | L2CAP channel published |
-| `channelOpen` | `channel: L2CAPChannel` | L2CAP channel opened by a central |
+| Event            | Arguments                                     | Description                             |
+| ---------------- | --------------------------------------------- | --------------------------------------- |
+| `stateChange`    | `state: BluetoothState`                       | Bluetooth adapter state changed         |
+| `serviceAdd`     | `uuid: string`                                | Service registered                      |
+| `readRequest`    | `request: ReadRequest`                        | Central read a characteristic           |
+| `writeRequest`   | `requests: WriteRequest[]`                    | Central wrote to a characteristic       |
+| `subscribe`      | `peer: unknown`, `characteristicUuid: string` | Central subscribed to notifications     |
+| `unsubscribe`    | `peer: unknown`, `characteristicUuid: string` | Central unsubscribed from notifications |
+| `error`          | `error: Error`                                | An error occurred                       |
+| `channelPublish` | `psm: number`                                 | L2CAP channel published                 |
+| `channelOpen`    | `channel: L2CAPChannel`                       | L2CAP channel opened by a central       |
 
 `peer` is `null` on Linux: BlueZ does not say which central toggled notifications.
 
