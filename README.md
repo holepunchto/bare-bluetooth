@@ -254,7 +254,7 @@ Discover characteristics for a `Service`. On Apple, an optional `characteristicU
 
 #### `peripheral.read(characteristic)`
 
-Read the value of a `Characteristic`. The result is emitted via `read`.
+Read the value of a `Characteristic`. The result is emitted via `read`. While subscribed, Linux also emits a `notify` with the same value, and Apple emits `notify` instead of `read`.
 
 #### `peripheral.write(characteristic, data[, withResponse])`
 
