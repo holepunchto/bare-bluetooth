@@ -3,7 +3,7 @@
 
 # bare-bluetooth
 
-Bluetooth bindings for Bare. Provides BLE central and peripheral roles, GATT services and characteristics, and L2CAP channels across Apple and Android platforms.
+Bluetooth bindings for Bare. Provides BLE central and peripheral roles, GATT services and characteristics, and L2CAP channels across Apple, Android and Linux.
 
 The module normalizes API differences between platforms so consumer code does not need platform conditionals. State strings, class names, and constants are unified.
 
@@ -115,6 +115,7 @@ The package resolves to a platform-specific implementation:
 
 - `android` resolves to [`bare-bluetooth-android`](https://github.com/holepunchto/bare-bluetooth-android)
 - `darwin` and `ios` resolve to [`bare-bluetooth-apple`](https://github.com/holepunchto/bare-bluetooth-apple)
+- `linux` resolves to [`bare-bluetooth-linux`](https://github.com/holepunchto/bare-bluetooth-linux)
 
 ## Types
 
@@ -122,16 +123,16 @@ The package resolves to a platform-specific implementation:
 
 A string describing the current Bluetooth adapter state.
 
-| Value            | Platforms      |
-| ---------------- | -------------- |
-| `'unknown'`      | Apple          |
-| `'resetting'`    | Apple          |
-| `'unsupported'`  | Apple          |
-| `'unauthorized'` | Apple          |
-| `'poweredOff'`   | Android, Apple |
-| `'poweredOn'`    | Android, Apple |
-| `'turningOn'`    | Android        |
-| `'turningOff'`   | Android        |
+| Value            | Platforms             |
+| ---------------- | --------------------- |
+| `'unknown'`      | Apple                 |
+| `'resetting'`    | Apple                 |
+| `'unsupported'`  | Apple                 |
+| `'unauthorized'` | Apple                 |
+| `'poweredOff'`   | Android, Apple, Linux |
+| `'poweredOn'`    | Android, Apple, Linux |
+| `'turningOn'`    | Android               |
+| `'turningOff'`   | Android               |
 
 ## API
 
@@ -157,13 +158,20 @@ Start scanning for peripherals. If `serviceUUIDs` is provided, only peripherals 
 options = {
   allowDuplicates: false, // Apple only
   scanMode: Central.SCAN_MODE_LOW_LATENCY, // Android only
-  callbackType: Central.CALLBACK_TYPE_FIRST_MATCH // Android only
+  callbackType: Central.CALLBACK_TYPE_FIRST_MATCH, // Android only
+  transport: 'le' // Linux only
 }
 ```
 
 Each option goes to the platform that understands it. Both platforms decide how often `discover` fires, but spell it differently, so set both to get the same behaviour everywhere.
 
-Set `allowDuplicates` (Apple) to `true` for a `discover` on every advertising packet, or `false` for one per scan.
+Set `allowDuplicates` (Apple) to `true` for a `discover` on every advertising packet. `false` asks CoreBluetooth to coalesce them, which it only does as a best effort: a peripheral still turns up several times per scan.
+
+`discover` reports what the platform reports, with no filtering of its own. Key peripherals by `id`, keep the latest, and de-duplicate there if you need to.
+
+Set `transport` (Linux) to `'le'` (default), `'auto'`, or `'bredr'`. `'auto'` also scans classic, where dual-mode devices such as TVs advertise their name, but slows BLE discovery; a dual-mode device shows up once per channel, and only the BLE one can be connected.
+
+On Linux the name may arrive after the first `discover`; when it does, `discover` fires again with `name` set. Key peripherals by `id` and keep the latest.
 
 Set `callbackType` (Android) to one of `Central.CALLBACK_TYPE_ALL_MATCHES`, `Central.CALLBACK_TYPE_FIRST_MATCH`, or `Central.CALLBACK_TYPE_MATCH_LOST`. `ALL_MATCHES` is the default and fires on every advertising packet, dozens per second per peripheral. `FIRST_MATCH` fires once per peripheral, but needs `serviceUUIDs` and hardware support: without it the scan fails with an `error`, so keep a fallback. It also stops `rssi` refreshing.
 
@@ -219,7 +227,7 @@ Represents a peripheral found during scanning. Emitted by the `discover` event o
 | ------------- | ---------------------------------------- | ------------------------------------------ |
 | `id`          | `string`                                 | Unique identifier of the peripheral        |
 | `name`        | `string \| null`                         | Advertised name, or `null`                 |
-| `rssi`        | `number`                                 | Signal strength in dBm                     |
+| `rssi`        | `number \| null`                         | Signal strength in dBm                     |
 | `serviceData` | `{ [uuid: string]: Uint8Array } \| null` | Service data from advertisement, or `null` |
 
 ## `Peripheral`
@@ -246,7 +254,7 @@ Discover characteristics for a `Service`. On Apple, an optional `characteristicU
 
 #### `peripheral.read(characteristic)`
 
-Read the value of a `Characteristic`. The result is emitted via `read`.
+Read the value of a `Characteristic`. The result is emitted via `read`. While subscribed, Linux also emits a `notify` with the same value, and Apple emits `notify` instead of `read`.
 
 #### `peripheral.write(characteristic, data[, withResponse])`
 
@@ -285,10 +293,10 @@ Destroy the peripheral instance and release resources.
 | `channelOpen`             | `channel: L2CAPChannel`                                         | L2CAP channel opened                     |
 | `error`                   | `error: Error`                                                  | An error occurred                        |
 
-| Event        | Arguments     | Platform |
-| ------------ | ------------- | -------- |
-| `disconnect` | _(none)_      | Android  |
-| `mtuChanged` | `mtu: number` | Android  |
+| Event        | Arguments     | Platform       |
+| ------------ | ------------- | -------------- |
+| `disconnect` | _(none)_      | Android, Linux |
+| `mtuChanged` | `mtu: number` | Android        |
 
 ### Constants
 
@@ -326,7 +334,7 @@ Start advertising the server.
 options = {
   name: null,
   serviceUUIDs: null,
-  serviceData: null // Apple only
+  serviceData: null // Apple and Linux only
 }
 ```
 
@@ -337,6 +345,8 @@ Stop advertising.
 #### `server.respondToRequest(request, result[, data])`
 
 Respond to a `ReadRequest` or `WriteRequest` with the given ATT `result: number` code. Optionally include `data: Uint8Array` for read responses. Use the `Server.ATT_*` constants for `result`.
+
+On Linux, a result BlueZ has no name for (`ATT_INVALID_HANDLE`, `ATT_INSUFFICIENT_RESOURCES`) reaches the central as `ATT_UNLIKELY_ERROR`. A read nobody listens for is answered with the characteristic's `value`; a write nobody listens for is accepted.
 
 #### `server.updateValue(characteristic, data)`
 
@@ -373,6 +383,8 @@ Destroy the server and release all resources.
 | `error`          | `error: Error`                                | An error occurred                       |
 | `channelPublish` | `psm: number`                                 | L2CAP channel published                 |
 | `channelOpen`    | `channel: L2CAPChannel`                       | L2CAP channel opened by a central       |
+
+`peer` is `null` on Linux: BlueZ does not say which central toggled notifications.
 
 | Event           | Arguments                                 | Platform |
 | --------------- | ----------------------------------------- | -------- |

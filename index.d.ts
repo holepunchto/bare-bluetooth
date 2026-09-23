@@ -14,7 +14,7 @@ export type BluetoothState =
 export interface DiscoveredPeripheral {
   id: string
   name: string | null
-  rssi: number
+  rssi: number | null
   serviceData: { [uuid: string]: Uint8Array } | null
 }
 
@@ -100,7 +100,12 @@ export class Central extends EventEmitter<CentralEventMap> {
 
   startScan(
     serviceUUIDs?: string[],
-    opts?: { allowDuplicates?: boolean; scanMode?: number; callbackType?: number }
+    opts?: {
+      allowDuplicates?: boolean
+      scanMode?: number
+      callbackType?: number
+      transport?: 'auto' | 'le' | 'bredr'
+    }
   ): void
   stopScan(): void
   connect(peripheral: DiscoveredPeripheral): void
