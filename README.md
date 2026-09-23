@@ -346,7 +346,7 @@ Stop advertising.
 
 Respond to a `ReadRequest` or `WriteRequest` with the given ATT `result: number` code. Optionally include `data: Uint8Array` for read responses. Use the `Server.ATT_*` constants for `result`.
 
-On Linux, a result BlueZ has no name for (`ATT_INVALID_HANDLE`, `ATT_UNLIKELY_ERROR`, `ATT_INSUFFICIENT_RESOURCES`) reaches the central as application error `0x80`. A read nobody listens for is answered with the characteristic's `value`; a write nobody listens for is accepted.
+On Linux, a result BlueZ has no name for (`ATT_INVALID_HANDLE`, `ATT_INSUFFICIENT_RESOURCES`) reaches the central as `ATT_UNLIKELY_ERROR`. A read nobody listens for is answered with the characteristic's `value`; a write nobody listens for is accepted.
 
 #### `server.updateValue(characteristic, data)`
 
