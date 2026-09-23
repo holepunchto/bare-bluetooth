@@ -85,8 +85,10 @@ function connect() {
     }, 20000)
   })
 
+  // BlueZ replays devices cached from earlier scans too; no RSSI means this
+  // scan has not actually heard it.
   central.on('discover', (discovered) => {
-    if (connecting) return
+    if (connecting || discovered.rssi === null) return
 
     connecting = true
     clearTimeout(searching)
