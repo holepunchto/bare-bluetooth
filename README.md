@@ -133,6 +133,12 @@ A string describing the current Bluetooth adapter state.
 | `'turningOn'`    | Android        |
 | `'turningOff'`   | Android        |
 
+### `BluetoothError`
+
+Thrown when a call cannot be made at all, with `code` saying why. This package raises one code, `NOT_POWERED_ON`.
+
+Failures that happen after a call returns arrive on the `error` event instead. Those come from the platform package, carry their own codes, and are not instances of this class.
+
 ## API
 
 ## `Central`
@@ -169,9 +175,11 @@ Set `callbackType` (Android) to one of `Central.CALLBACK_TYPE_ALL_MATCHES`, `Cen
 
 Set `scanMode` (Android) to one of `Central.SCAN_MODE_OPPORTUNISTIC`, `Central.SCAN_MODE_LOW_POWER`, `Central.SCAN_MODE_BALANCED`, or `Central.SCAN_MODE_LOW_LATENCY`.
 
+Throws a `BluetoothError` with code `NOT_POWERED_ON` unless `central.state` is `'poweredOn'`.
+
 #### `central.stopScan()`
 
-Stop scanning for peripherals.
+Stop scanning for peripherals. Does nothing unless `central.state` is `'poweredOn'`, since the scan is already gone.
 
 #### `central.connect(peripheral)`
 

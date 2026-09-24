@@ -1,5 +1,7 @@
 const platform = require('#bluetooth')
 
+exports.BluetoothError = require('./lib/errors')
+
 exports.Central = platform.Central
 exports.Peripheral = platform.Peripheral
 exports.Server = platform.Server
