@@ -11,6 +11,13 @@ export type BluetoothState =
   | 'turningOn'
   | 'turningOff'
 
+export class BluetoothError extends Error {
+  readonly name: 'BluetoothError'
+  readonly code: string
+
+  static NOT_POWERED_ON(state: BluetoothState): BluetoothError
+}
+
 export interface DiscoveredPeripheral {
   id: string
   name: string | null
@@ -98,10 +105,12 @@ export class Central extends EventEmitter<CentralEventMap> {
 
   readonly state: BluetoothState
 
+  /** Throws `NOT_POWERED_ON` unless `state` is `'poweredOn'`. */
   startScan(
     serviceUUIDs?: string[],
     opts?: { allowDuplicates?: boolean; scanMode?: number; callbackType?: number }
   ): void
+  /** Does nothing unless `state` is `'poweredOn'`; the scan is already gone. */
   stopScan(): void
   connect(peripheral: DiscoveredPeripheral): void
   disconnect(peripheral: Peripheral): void
