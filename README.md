@@ -135,9 +135,9 @@ A string describing the current Bluetooth adapter state.
 
 ### `BluetoothError`
 
-The error thrown by this package, and the shape of the errors carried by `error` events. `code` identifies the failure, for example `NOT_POWERED_ON` or `SCAN_FAILED`.
+Thrown when a call cannot be made at all, with `code` saying why. This package raises one code, `NOT_POWERED_ON`.
 
-Errors reach you two ways: a method throws when the call cannot be made at all, and the `error` event carries failures that happen after a call returns.
+Failures that happen after a call returns arrive on the `error` event instead. Those come from the platform package, carry their own codes, and are not instances of this class.
 
 ## API
 
