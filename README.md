@@ -364,6 +364,10 @@ options = {
 
 Unpublish a previously published L2CAP channel identified by `psm: number`.
 
+#### `server.removeAllServices()`
+
+Remove every service previously added with `server.addService()`. Apple only. `undefined` on other platforms.
+
 #### `server.destroy()`
 
 Destroy the server and release all resources.
