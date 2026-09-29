@@ -165,7 +165,6 @@ export class Server extends EventEmitter<ServerEventMap> {
   updateValue(characteristic: Characteristic, data: Uint8Array): boolean
   publishChannel(opts?: ChannelOptions): void
   unpublishChannel(psm: number): void
-  // Apple only, undefined on other platforms
   removeAllServices?(): void
   destroy(): void
 
