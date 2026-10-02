@@ -16,6 +16,8 @@ export class BluetoothError extends Error {
   readonly code: string
 
   static NOT_POWERED_ON(state: BluetoothState): BluetoothError
+  /** A GATT operation could not be sent. */
+  static NOT_INITIATED(op: string): BluetoothError
 }
 
 export interface DiscoveredPeripheral {
