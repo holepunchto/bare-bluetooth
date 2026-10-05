@@ -11,6 +11,15 @@ export type BluetoothState =
   | 'turningOn'
   | 'turningOff'
 
+export class BluetoothError extends Error {
+  readonly name: 'BluetoothError'
+  readonly code: string
+
+  static NOT_POWERED_ON(state: BluetoothState): BluetoothError
+  /** A GATT operation could not be sent. */
+  static NOT_INITIATED(op: string): BluetoothError
+}
+
 export interface DiscoveredPeripheral {
   id: string
   name: string | null
@@ -98,6 +107,7 @@ export class Central extends EventEmitter<CentralEventMap> {
 
   readonly state: BluetoothState
 
+  /** Throws `NOT_POWERED_ON` unless `state` is `'poweredOn'`. */
   startScan(
     serviceUUIDs?: string[],
     opts?: {
@@ -107,6 +117,7 @@ export class Central extends EventEmitter<CentralEventMap> {
       transport?: 'auto' | 'le' | 'bredr'
     }
   ): void
+  /** Does nothing unless `state` is `'poweredOn'`; the scan is already gone. */
   stopScan(): void
   connect(peripheral: DiscoveredPeripheral): void
   disconnect(peripheral: Peripheral): void
@@ -161,6 +172,7 @@ export class Server extends EventEmitter<ServerEventMap> {
   updateValue(characteristic: Characteristic, data: Uint8Array): boolean
   publishChannel(opts?: ChannelOptions): void
   unpublishChannel(psm: number): void
+  removeAllServices?(): void
   destroy(): void
 
   static readonly STATE_UNKNOWN: number

@@ -134,6 +134,12 @@ A string describing the current Bluetooth adapter state.
 | `'turningOn'`    | Android               |
 | `'turningOff'`   | Android               |
 
+### `BluetoothError`
+
+Thrown when a call cannot be made at all, with `code` saying why. This package raises two codes: `NOT_POWERED_ON`, thrown by `startScan`, and `NOT_INITIATED`, emitted on `error` when a GATT operation could not be sent.
+
+Other failures that happen after a call returns arrive on the `error` event too. Those come from the platform package, carry their own codes, and are not instances of this class.
+
 ## API
 
 ## `Central`
@@ -177,9 +183,11 @@ Set `callbackType` (Android) to one of `Central.CALLBACK_TYPE_ALL_MATCHES`, `Cen
 
 Set `scanMode` (Android) to one of `Central.SCAN_MODE_OPPORTUNISTIC`, `Central.SCAN_MODE_LOW_POWER`, `Central.SCAN_MODE_BALANCED`, or `Central.SCAN_MODE_LOW_LATENCY`.
 
+Throws a `BluetoothError` with code `NOT_POWERED_ON` unless `central.state` is `'poweredOn'`.
+
 #### `central.stopScan()`
 
-Stop scanning for peripherals.
+Stop scanning for peripherals. Does nothing unless `central.state` is `'poweredOn'`, since the scan is already gone.
 
 #### `central.connect(peripheral)`
 
@@ -365,6 +373,10 @@ options = {
 #### `server.unpublishChannel(psm)`
 
 Unpublish a previously published L2CAP channel identified by `psm: number`.
+
+#### `server.removeAllServices()`
+
+Remove every service previously added with `server.addService()`. Apple and Linux only. `undefined` on other platforms.
 
 #### `server.destroy()`
 
