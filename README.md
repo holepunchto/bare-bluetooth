@@ -135,9 +135,9 @@ A string describing the current Bluetooth adapter state.
 
 ### `BluetoothError`
 
-Thrown when a call cannot be made at all, with `code` saying why. This package raises one code, `NOT_POWERED_ON`.
+Thrown when a call cannot be made at all, with `code` saying why. This package raises two codes: `NOT_POWERED_ON`, thrown by `startScan`, and `NOT_INITIATED`, emitted on `error` when a GATT operation could not be sent.
 
-Failures that happen after a call returns arrive on the `error` event instead. Those come from the platform package, carry their own codes, and are not instances of this class.
+Other failures that happen after a call returns arrive on the `error` event too. Those come from the platform package, carry their own codes, and are not instances of this class.
 
 ## API
 
