@@ -144,9 +144,14 @@ Other failures that happen after a call returns arrive on the `error` event too.
 
 ## `Central`
 
-### `const central = new Central()`
+### `const central = new Central([options])`
 
 Create a new BLE central manager. The central scans for and connects to peripherals.
+
+| Option       | Default               | Description                                                                                                                                 |
+| ------------ | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `agent`      | accepts every request | Linux only. An `Agent` subclass answering BlueZ pairing requests: return or resolve `true` to accept, `false` or throw to refuse.           |
+| `capability` | `'NoInputNoOutput'`   | Linux only. What the agent can show or type: `'NoInputNoOutput'`, `'DisplayOnly'`, `'DisplayYesNo'`, `'KeyboardOnly'`, `'KeyboardDisplay'`. |
 
 ### Properties
 
@@ -318,9 +323,14 @@ Destroy the peripheral instance and release resources.
 
 ## `Server`
 
-### `const server = new Server()`
+### `const server = new Server([options])`
 
 Create a new BLE peripheral manager (server). The server advertises services and handles read/write requests from centrals.
+
+| Option       | Default               | Description                                                                                                                                 |
+| ------------ | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `agent`      | accepts every request | Linux only. An `Agent` subclass answering BlueZ pairing requests: return or resolve `true` to accept, `false` or throw to refuse.           |
+| `capability` | `'NoInputNoOutput'`   | Linux only. What the agent can show or type: `'NoInputNoOutput'`, `'DisplayOnly'`, `'DisplayYesNo'`, `'KeyboardOnly'`, `'KeyboardDisplay'`. |
 
 ### Properties
 

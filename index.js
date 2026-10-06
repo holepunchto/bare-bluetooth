@@ -8,3 +8,4 @@ exports.Server = platform.Server
 exports.L2CAPChannel = platform.L2CAPChannel
 exports.Service = platform.Service
 exports.Characteristic = platform.Characteristic
+exports.Agent = platform.Agent

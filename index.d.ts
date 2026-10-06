@@ -47,6 +47,29 @@ export interface AdvertisingOptions {
   serviceData?: { [uuid: string]: Uint8Array }
 }
 
+export type AgentCapability =
+  'NoInputNoOutput' | 'DisplayOnly' | 'DisplayYesNo' | 'KeyboardOnly' | 'KeyboardDisplay'
+
+/** Answers BlueZ pairing requests. Return or resolve true to accept, false or throw to refuse. */
+export class Agent {
+  requestPinCode(device: string): string | Promise<string>
+  requestPasskey(device: string): number | Promise<number>
+  requestConfirmation(device: string, passkey: number): boolean | Promise<boolean>
+  requestAuthorization(device: string): boolean | Promise<boolean>
+  authorizeService(device: string, uuid: string): boolean | Promise<boolean>
+  displayPinCode(device: string, pincode: string): void
+  displayPasskey(device: string, passkey: number, entered: number): void
+  release(): void
+  cancel(): void
+}
+
+export interface PairingOptions {
+  /** Linux only, ignored elsewhere. Defaults to an agent that accepts everything. */
+  agent?: Agent
+  /** Linux only, ignored elsewhere. What the agent can show or type. Defaults to 'NoInputNoOutput'. */
+  capability?: AgentCapability
+}
+
 export interface ChannelOptions {
   encrypted?: boolean
 }
@@ -103,7 +126,7 @@ export interface ServerEventMap extends EventMap {
 }
 
 export class Central extends EventEmitter<CentralEventMap> {
-  constructor()
+  constructor(opts?: PairingOptions)
 
   readonly state: BluetoothState
 
@@ -157,7 +180,7 @@ export class Peripheral extends EventEmitter<PeripheralEventMap> {
 }
 
 export class Server extends EventEmitter<ServerEventMap> {
-  constructor()
+  constructor(opts?: PairingOptions)
 
   readonly state: BluetoothState
 
