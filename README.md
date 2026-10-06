@@ -127,7 +127,7 @@ A string describing the current Bluetooth adapter state.
 | ---------------- | --------------------- |
 | `'unknown'`      | Apple                 |
 | `'resetting'`    | Apple                 |
-| `'unsupported'`  | Apple                 |
+| `'unsupported'`  | Apple, Linux          |
 | `'unauthorized'` | Apple                 |
 | `'poweredOff'`   | Android, Apple, Linux |
 | `'poweredOn'`    | Android, Apple, Linux |
