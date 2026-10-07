@@ -1,6 +1,6 @@
 {
   "name": "bare-bluetooth",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Bluetooth bindings for Bare",
   "exports": {
     "./package": "./package.json",
