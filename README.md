@@ -322,14 +322,6 @@ Create a new BLE peripheral manager (server). The server advertises services and
 
 ### Methods
 
-#### `server.open()`
-
-Open the GATT server. Called for you on every transition to `poweredOn`, before the `stateChange` event is emitted, so a listener reacting to `poweredOn` always finds it open. A no-op if it is already open, and on platforms other than Android. The services do not survive the adapter powering off and have to be added again.
-
-#### `server.close()`
-
-Close the GATT server, dropping its services. Called for you whenever `state` leaves `poweredOn`. A no-op if it is not open, and on platforms other than Android.
-
 #### `server.addService(service)`
 
 Add a `Service` to the GATT server. The `serviceAdd` event is emitted when the service has been registered.
