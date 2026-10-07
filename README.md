@@ -30,8 +30,6 @@ let pingChar = null
 server.on('stateChange', (state) => {
   if (state !== 'poweredOn') return
 
-  server.open() // Android only, a no-op elsewhere
-
   pingChar = new Characteristic(CHAR_UUID, {
     write: true,
     notify: true
@@ -326,11 +324,11 @@ Create a new BLE peripheral manager (server). The server advertises services and
 
 #### `server.open()`
 
-Open the GATT server. Android only, and a no-op elsewhere, so it can be called unconditionally. Call it once `state` is `poweredOn`, before adding any service. The handle does not survive the adapter powering off, so call it again on every transition back to `poweredOn` and re-add the services.
+Open the GATT server. Called for you on every transition to `poweredOn`, before the `stateChange` event is emitted, so a listener reacting to `poweredOn` always finds it open. A no-op if it is already open, and on platforms other than Android. The services do not survive the adapter powering off and have to be added again.
 
 #### `server.close()`
 
-Close the GATT server, dropping its services. Android only, and a no-op elsewhere. Also a no-op if it is not open.
+Close the GATT server, dropping its services. Called for you whenever `state` leaves `poweredOn`. A no-op if it is not open, and on platforms other than Android.
 
 #### `server.addService(service)`
 
