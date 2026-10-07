@@ -156,6 +156,8 @@ export class Server extends EventEmitter<ServerEventMap> {
 
   readonly state: BluetoothState
 
+  open(): void
+  close(): void
   addService(service: Service): void
   startAdvertising(opts?: AdvertisingOptions): void
   stopAdvertising(): void
