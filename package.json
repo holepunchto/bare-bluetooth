@@ -35,7 +35,7 @@
   "dependencies": {
     "bare-bluetooth-android": "^0.9.0",
     "bare-bluetooth-apple": "^0.5.1",
-    "bare-bluetooth-linux": "^0.7.0",
+    "bare-bluetooth-linux": "^0.9.0",
     "fast-fifo": "^1.3.2"
   },
   "devDependencies": {

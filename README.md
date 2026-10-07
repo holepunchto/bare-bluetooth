@@ -408,14 +408,14 @@ Destroy the server and release all resources.
 
 `peer` is `null` on Linux: BlueZ does not say which central toggled notifications.
 
-| Event           | Arguments                                 | Platform |
-| --------------- | ----------------------------------------- | -------- |
-| `connecting`    | `deviceAddress: string`                   | Android  |
-| `connected`     | `deviceAddress: string`                   | Android  |
-| `disconnecting` | `deviceAddress: string`                   | Android  |
-| `disconnected`  | `deviceAddress: string`                   | Android  |
-| `notifySent`    | `deviceAddress: string`, `status: number` | Android  |
-| `readyToUpdate` | _(none)_                                  | Apple    |
+| Event           | Arguments                                 | Platform       |
+| --------------- | ----------------------------------------- | -------------- |
+| `connecting`    | `deviceAddress: string`                   | Android        |
+| `connected`     | `deviceAddress: string`                   | Android, Linux |
+| `disconnecting` | `deviceAddress: string`                   | Android        |
+| `disconnected`  | `deviceAddress: string`                   | Android, Linux |
+| `notifySent`    | `deviceAddress: string`, `status: number` | Android        |
+| `readyToUpdate` | _(none)_                                  | Apple          |
 
 ### Constants
 
