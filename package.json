@@ -10,7 +10,8 @@
     "#bluetooth": {
       "android": "./lib/android.js",
       "darwin": "./lib/apple.js",
-      "ios": "./lib/apple.js"
+      "ios": "./lib/apple.js",
+      "linux": "./lib/linux.js"
     }
   },
   "files": [
@@ -34,6 +35,7 @@
   "dependencies": {
     "bare-bluetooth-android": "^0.11.0",
     "bare-bluetooth-apple": "^0.7.0",
+    "bare-bluetooth-linux": "^0.9.2",
     "fast-fifo": "^1.3.2"
   },
   "devDependencies": {

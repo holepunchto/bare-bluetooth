@@ -23,7 +23,7 @@ export class BluetoothError extends Error {
 export interface DiscoveredPeripheral {
   id: string
   name: string | null
-  rssi: number
+  rssi: number | null
   serviceData: { [uuid: string]: Uint8Array } | null
 }
 
@@ -63,11 +63,20 @@ export interface WriteRequest {
   responseNeeded: boolean
 }
 
+/** Linux only. Nothing listening refuses the pairing. */
+export interface PairRequest {
+  deviceAddress: string
+  name: string | null
+  accept(): void
+  reject(): void
+}
+
 export interface CentralEventMap extends EventMap {
   stateChange: [state: BluetoothState]
   discover: [peripheral: DiscoveredPeripheral]
   connect: [peripheral: Peripheral]
   disconnect: [peripheral: Peripheral | null]
+  pairRequest: [request: PairRequest]
   error: [error: Error]
 }
 
@@ -91,6 +100,7 @@ export interface ServerEventMap extends EventMap {
   writeRequest: [requests: WriteRequest[]]
   subscribe: [peer: unknown, characteristicUuid: string]
   unsubscribe: [peer: unknown, characteristicUuid: string]
+  pairRequest: [request: PairRequest]
   error: [error: Error]
   channelPublish: [psm: number]
   channelOpen: [channel: L2CAPChannel]
@@ -110,7 +120,12 @@ export class Central extends EventEmitter<CentralEventMap> {
   /** Throws `NOT_POWERED_ON` unless `state` is `'poweredOn'`. */
   startScan(
     serviceUUIDs?: string[],
-    opts?: { allowDuplicates?: boolean; scanMode?: number; callbackType?: number }
+    opts?: {
+      allowDuplicates?: boolean
+      scanMode?: number
+      callbackType?: number
+      transport?: 'auto' | 'le' | 'bredr'
+    }
   ): void
   /** Does nothing unless `state` is `'poweredOn'`; the scan is already gone. */
   stopScan(): void
