@@ -144,14 +144,9 @@ Other failures that happen after a call returns arrive on the `error` event too.
 
 ## `Central`
 
-### `const central = new Central([options])`
+### `const central = new Central()`
 
 Create a new BLE central manager. The central scans for and connects to peripherals.
-
-| Option       | Default               | Description                                                                                                                                 |
-| ------------ | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `agent`      | accepts every request | Linux only. An `Agent` subclass answering BlueZ pairing requests: return or resolve `true` to accept, `false` or throw to refuse.           |
-| `capability` | `'NoInputNoOutput'`   | Linux only. What the agent can show or type: `'NoInputNoOutput'`, `'DisplayOnly'`, `'DisplayYesNo'`, `'KeyboardOnly'`, `'KeyboardDisplay'`. |
 
 ### Properties
 
@@ -215,6 +210,10 @@ Destroy the central manager and release all resources.
 | `connect`     | `peripheral: Peripheral`           | Connection to a peripheral established |
 | `disconnect`  | `peripheral: Peripheral \| null`   | A peripheral disconnected cleanly      |
 | `error`       | `error: Error`                     | An error occurred                      |
+
+| Event         | Arguments              | Platform |
+| ------------- | ---------------------- | -------- |
+| `pairRequest` | `request: PairRequest` | Linux    |
 
 ### Constants
 
@@ -323,14 +322,9 @@ Destroy the peripheral instance and release resources.
 
 ## `Server`
 
-### `const server = new Server([options])`
+### `const server = new Server()`
 
 Create a new BLE peripheral manager (server). The server advertises services and handles read/write requests from centrals.
-
-| Option       | Default               | Description                                                                                                                                 |
-| ------------ | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `agent`      | accepts every request | Linux only. An `Agent` subclass answering BlueZ pairing requests: return or resolve `true` to accept, `false` or throw to refuse.           |
-| `capability` | `'NoInputNoOutput'`   | Linux only. What the agent can show or type: `'NoInputNoOutput'`, `'DisplayOnly'`, `'DisplayYesNo'`, `'KeyboardOnly'`, `'KeyboardDisplay'`. |
 
 ### Properties
 
@@ -416,6 +410,7 @@ Destroy the server and release all resources.
 | `disconnected`  | `deviceAddress: string`                   | Android, Linux |
 | `notifySent`    | `deviceAddress: string`, `status: number` | Android        |
 | `readyToUpdate` | _(none)_                                  | Apple          |
+| `pairRequest`   | `request: PairRequest`                    | Linux          |
 
 ### Constants
 
@@ -492,6 +487,29 @@ Represents a write request from a central. Emitted as an array by the `writeRequ
 | `offset`             | `number`     | Byte offset for the write                |
 | `data`               | `Uint8Array` | Data being written                       |
 | `responseNeeded`     | `boolean`    | Whether the central expects a response   |
+
+## `PairRequest`
+
+Linux only. A peer wants to pair. Emitted by the `pairRequest` event on `Central` and `Server`, and refused when nothing is listening.
+
+Apple and Android hand the decision to the operating system, which prompts the user; BlueZ has no prompt to fall back on, so the app answers instead. Pairing is always "just works": a machine with no screen and no keyboard cannot compare a passkey, so there is nothing else to answer. Reach for `bare-bluetooth-linux` directly if you need BlueZ's other pairing modes.
+
+### Properties
+
+| Property        | Type             | Description                     |
+| --------------- | ---------------- | ------------------------------- |
+| `deviceAddress` | `string`         | Address of the peer             |
+| `name`          | `string \| null` | Name of the peer, if it has one |
+
+### Methods
+
+#### `request.accept()`
+
+Allow the pairing. The first answer wins; a later one does nothing.
+
+#### `request.reject()`
+
+Refuse the pairing.
 
 ## `L2CAPChannel`
 
