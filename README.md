@@ -563,12 +563,12 @@ Create a GATT characteristic definition.
 
 ### Properties
 
-| Property      | Type                 | Description                                   |
-| ------------- | -------------------- | --------------------------------------------- |
-| `uuid`        | `string`             | UUID of the characteristic                    |
-| `properties`  | `number`             | Bitmask of characteristic properties          |
-| `permissions` | `number \| null`     | Bitmask of permissions, or `null` if inferred |
-| `value`       | `Uint8Array \| null` | Static value (read/write)                     |
+| Property      | Type                 | Description                                                    |
+| ------------- | -------------------- | -------------------------------------------------------------- |
+| `uuid`        | `string`             | UUID of the characteristic                                     |
+| `properties`  | `number`             | Bitmask of characteristic properties                           |
+| `permissions` | `number \| null`     | Bitmask of permissions, or `null` if inferred                  |
+| `value`       | `Uint8Array \| null` | Static value. Setting it on a discovered characteristic throws |
 
 ### Constants
 
