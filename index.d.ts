@@ -25,6 +25,8 @@ export interface DiscoveredPeripheral {
   name: string | null
   rssi: number | null
   serviceData: { [uuid: string]: Uint8Array } | null
+  /** Canonical 128-bit lowercased UUIDs, empty when the peripheral advertised none. */
+  serviceUUIDs: string[]
 }
 
 export interface ServiceOptions {

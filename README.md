@@ -235,12 +235,13 @@ Represents a peripheral found during scanning. Emitted by the `discover` event o
 
 ### Properties
 
-| Property      | Type                                     | Description                                |
-| ------------- | ---------------------------------------- | ------------------------------------------ |
-| `id`          | `string`                                 | Unique identifier of the peripheral        |
-| `name`        | `string \| null`                         | Advertised name, or `null`                 |
-| `rssi`        | `number \| null`                         | Signal strength in dBm                     |
-| `serviceData` | `{ [uuid: string]: Uint8Array } \| null` | Service data from advertisement, or `null` |
+| Property       | Type                                     | Description                                          |
+| -------------- | ---------------------------------------- | ---------------------------------------------------- |
+| `id`           | `string`                                 | Unique identifier of the peripheral                  |
+| `name`         | `string \| null`                         | Advertised name, or `null`                           |
+| `rssi`         | `number \| null`                         | Signal strength in dBm                               |
+| `serviceData`  | `{ [uuid: string]: Uint8Array } \| null` | Service data from advertisement, or `null`           |
+| `serviceUUIDs` | `string[]`                               | Advertised service UUIDs, canonical form, lowercased |
 
 ## `Peripheral`
 
